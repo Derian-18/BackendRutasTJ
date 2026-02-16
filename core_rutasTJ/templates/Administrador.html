@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Administrador</title>
+</head>
+<body>
+
+    <header>
+        <nav>
+            <strong>Rutas TJ</strong>
+            <ul>
+                <li><a href="{% url 'home' %}">Inicio</a></li>
+                <li><a href="{% url 'mapa' %}">Mapa</a></li>
+                <li><strong>Contacto</strong></a></li>
+                <li><a href="{% url 'login' %}">Iniciar sesion/Administrador</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <hr>
+
+    <main>
+        <section>
+            <h1>Agrega unidades de transporte</h1>
+            <form>
+                <p>
+                    Ingresa el numero de unidad: 
+                    <input type="text">
+                </p>
+                <p>
+                    Numero-unidad: 
+                    <input type="text">
+                </p>
+                <p>Numero de tipo de la unidad</p>
+                <button type="button">Subrayar la ruta de la unidad</button>
+                <br><br>
+                <div style="width: 300px; height: 150px; border: 1px solid black; text-align: center;">
+                    <br>[Espacio Interactivo para el Mapa]
+                </div>
+                <br>
+                <button type="submit">Agregar</button>
+            </form>
+        </section>
+
+        <br>
+        <section>
+            <h2>Lista de unidades</h2>
+            <table border="1">
+                <thead>
+                    <tr>
+                        <th>Numero de unidad:</th>
+                        <th>Ruta</th>
+                        <th>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>980</td>
+                        <td>5 Y 10</td>
+                        <td>
+                            <button type="button">Editar</button>
+                            <button type="button">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>435</td>
+                        <td>Valle Verde</td>
+                        <td>
+                            <button type="button">Editar</button>
+                            <button type="button">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>1245</td>
+                        <td>Mariano Matamoros</td>
+                        <td>
+                            <button type="button">Editar</button>
+                            <button type="button">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>754</td>
+                        <td>Valle Verde</td>
+                        <td>
+                            <button type="button">Editar</button>
+                            <button type="button">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>562</td>
+                        <td>Mariano Matamoros</td>
+                        <td>
+                            <button type="button">Editar</button>
+                            <button type="button">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>235</td>
+                        <td>Valle Verde</td>
+                        <td>
+                            <button type="button">Editar</button>
+                            <button type="button">Eliminar</button>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>0782</td>
+                        <td>Mariano Matamoros</td>
+                        <td>
+                            <button type="button">Editar</button>
+                            <button type="button">Eliminar</button>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </section>
+    </main>
+
+</body>
+</html>

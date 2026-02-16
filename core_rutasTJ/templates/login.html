@@ -11,8 +11,13 @@
 <body>
     <header>
         <nav>
+            <strong>Rutas TJ</strong>
             <ul>
-                <li><a href="{% url 'home' %}">Volver al inicio</a></li>
+                <li><a href="{% url 'home' %}">Inicio</a></li>
+                <li><a href="{% url 'mapa' %}">Mapa</a></li>
+                <li><a href="{% url 'contacto' %}">Contacto</a></li>
+                <li><strong>Iniciar sesion/Administrador</strong></li>
+                <li><a href="{% url 'admin_panel' %}">Panel Admin</a></li>
             </ul>
         </nav>
         <h2>Iniciar sesion</h2>

@@ -29,3 +29,9 @@ def login_view(request):
 
 def admin(request):
     return render(request, 'admin.html')
+
+def mapa_view(request):
+    return render(request, 'Mapa.html')
+
+def administrador_view(request):
+    return render(request, 'Administrador.html')

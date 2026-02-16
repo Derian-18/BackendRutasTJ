@@ -22,5 +22,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('', views.home, name='home'),
     path('contacto/', views.contacto, name="contacto"),
-    path('panel-admin/', include('panel.urls'))
+    path('panel-admin/', include('panel.urls')),
+    path('mapa/', views.mapa_view, name='mapa'),
+    path('admin-panel/', views.administrador_view, name='admin_panel'),
 ]
