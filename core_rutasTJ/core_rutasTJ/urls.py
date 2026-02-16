@@ -16,13 +16,17 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from panel import views
 
 urlpatterns = [
+    # Esta es la url del admin
     path('admin/', admin.site.urls),
-    path('', views.home, name='home'),
-    path('contacto/', views.contacto, name="contacto"),
-    path('panel-admin/', include('panel.urls')),
-    path('mapa/', views.mapa_view, name='mapa'),
-    path('admin-panel/', views.administrador_view, name='admin_panel'),
+
+    # Aqui incluimos las urls de la app principal
+    path('', include('apps.principal.urls')),
+
+    # Aqui incluimos las urls de la app panel que es el administrador
+    path('panel/', include('apps.panel.urls')),
+
+    # Aqui incluimos las urls de la app rutas
+    path('rutas/', include('apps.rutas.urls'))
 ]

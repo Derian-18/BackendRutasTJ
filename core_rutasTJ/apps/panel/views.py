@@ -1,18 +1,16 @@
 from django.shortcuts import render, redirect
 from django.contrib import messages
-from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth import authenticate, login, logout as auth_logout
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 # Aqui iran las vistas para el login
 
-def home(request):
-    return render(request, 'index.html')
-
-def contacto(request):
-    return render(request, 'contacto.html')
-
 # Iniciar sesion
 def login_view(request):
+    if request.user.is_authenticated:
+        return redirect('administrador')
+
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
@@ -21,17 +19,17 @@ def login_view(request):
 
         if user is not None:
             login(request, user)
-            return redirect("admin")  # Cambia a tu vista principal
+            return redirect('administrador')  # Cambia a tu vista principal
         else:
             messages.error(request, "Usuario o contraseña incorrectos")
 
-    return render(request, "login.html")
+    return render(request, 'panel/login.html')
 
-def admin(request):
-    return render(request, 'admin.html')
+def logout_view(request):
+    auth_logout(request)
+    messages.success(request, 'Sesion cerrada correctamente.')
+    return redirect('home')
 
-def mapa_view(request):
-    return render(request, 'Mapa.html')
-
+@login_required
 def administrador_view(request):
-    return render(request, 'Administrador.html')
+    return render(request, 'panel/Administrador.html')

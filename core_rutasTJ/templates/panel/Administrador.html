@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -12,8 +13,13 @@
             <ul>
                 <li><a href="{% url 'home' %}">Inicio</a></li>
                 <li><a href="{% url 'mapa' %}">Mapa</a></li>
-                <li><strong>Contacto</strong></a></li>
-                <li><a href="{% url 'login' %}">Iniciar sesion/Administrador</a></li>
+                <li><a href="{% url 'contacto' %}">Contacto</a></a></li>
+                <li><strong>Iniciar sesion/Administrador</strong></li>
+                {% if user.is_authenticated %}
+                    <a href="{% url 'logout' %}">Cerrar sesion</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="btn-admin">Administrador</a>
+                {% endif %}
             </ul>
         </nav>
     </header>

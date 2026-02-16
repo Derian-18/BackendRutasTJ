@@ -1,0 +1,152 @@
+/* Definición de colores azules */
+* {
+    --azul-oscuro: #002b5c; /* Color de la barra superior/botones */
+    --azul-claro: #eef4f8;  /* Color de fondo suave */
+    --blanco: #ffffff;
+    --texto: #333333;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    background-color: var(--azul-claro);
+    color: var(--texto);
+}
+
+/* Header / Barra de Navegación */
+header {
+    background-color: var(--azul-oscuro);
+    padding: 15px 5%;
+    color: white;
+}
+
+nav {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+nav ul {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+}
+
+nav ul li {
+    margin-left: 20px;
+}
+
+nav a, nav strong {
+    color: white;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.btn-admin {
+    border: 1px solid white;
+    padding: 5px 10px;
+    border-radius: 3px;
+}
+
+/* Sección Principal (Hero) */
+.hero {
+    display: flex;
+    align-items: center;
+    padding: 40px 10%;
+    gap: 40px;
+    flex-wrap: wrap;
+}
+
+.hero-img {
+    flex: 1;
+    min-width: 300px;
+}
+
+.hero-img img {
+    width: 100%;
+    border-radius: 8px;
+    box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.1);
+}
+
+.hero-text {
+    flex: 1.2;
+    min-width: 300px;
+}
+
+.hero-text h1 {
+    font-size: 32px;
+    margin-bottom: 20px;
+    line-height: 1.2;
+}
+
+.hero-text p {
+    font-size: 16px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+}
+
+.btn-mapa {
+    background-color: var(--azul-oscuro);
+    color: white;
+    padding: 12px 25px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 8px;
+    display: inline-block;
+}
+
+/* Sección de Características (Iconos) */
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    padding: 40px 10%;
+    text-align: center;
+}
+
+.feature-item {
+    padding: 20px;
+}
+
+.feature-item i {
+    font-size: 40px;
+    margin-bottom: 15px;
+    display: block;
+}
+
+.feature-item h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+}
+
+.feature-item p {
+    font-size: 14px;
+    color: #555;
+}
+
+/* Footer */
+footer {
+    background-color: var(--azul-oscuro);
+    color: white;
+    text-align: center;
+    padding: 10px 0;
+    margin-top: 20px;
+}
+
+/* Estilos para que se parezca al diseño de la imagen */
+hr {
+    border: 0;
+    border-top: 1px solid #ccc;
+    margin: 0 10%;
+}
