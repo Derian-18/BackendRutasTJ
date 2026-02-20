@@ -1,0 +1,50 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login | Rutas TJ</title>
+    <link rel="stylesheet" href="{% static 'panel/css/login.css' %}">
+</head>
+
+<body>
+    <nav>
+        <strong>Rutas TJ</strong>
+        <ul>
+            <li><a href="{% url 'home' %}">Inicio</a></li>
+            <li><a href="{% url 'mapa' %}">Mapa</a></li>
+            <li><a href="{% url 'contacto' %}">Contacto</a></li>
+            <li><strong>Iniciar sesión</strong></li>
+        </ul>
+    </nav>
+
+    <header>
+        <h2>Iniciar sesión</h2>
+    </header>
+
+    <main>
+        {% if messages %}
+            {% for message in messages %}
+                <p class="error-msg">{{ message }}</p>
+            {% endfor %}
+        {% endif %}
+
+        <form method="POST">
+            {% csrf_token %}
+            <label for="user">Usuario:</label>
+            <input type="text" id="user" name="username" placeholder="Tu usuario">
+
+            <label for="pass">Contraseña:</label>
+            <input type="password" id="pass" name="password" placeholder="********">
+
+            <button type="submit">Entrar</button>
+        </form>
+    </main>
+
+    <footer>
+        &copy; {% now "Y" %} Rutas TJ - Todos los derechos reservados.
+    </footer>
+</body>
+</html>

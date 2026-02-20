@@ -1,0 +1,59 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mapa de Rutas TJ</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+
+    <header>
+        <nav>
+            <strong>Rutas TJ</strong>
+            <ul>
+                <li><a href="{% url 'home' %}">Inicio</a></li>
+                <li><strong>Mapa</strong></li>
+                <li><a href="{% url 'contacto' %}">Contacto</a></li>
+                <li><a href="{% url 'login' %}">Iniciar sesion/Administrador</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main style="display: flex;">
+        <aside style="width: 30%;">
+            <h3>Ingresa el numero de unidad</h3>
+            
+            <form>
+                <input type="text" placeholder="Ej. 987">
+                <button type="button">🔍</button>
+            </form>
+
+            <div id="info-unidad" style="margin-top: 20px; padding: 10px; background: #f0f0f0;">
+                <p><strong>Unidad 987 - Mariano Matamoros</strong></p>
+                <button>Ver ruta</button>
+            </div>
+        </aside>
+
+        <section style="width: 70%;">
+            <div id="map" style="height: 500px; width: 100%; border: 1px solid #ccc;"></div>
+        </section>
+    </main>
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        // Coordenadas aproximadas de Tijuana
+        var map = L.map('map').setView([32.5149, -117.0382], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '© OpenStreetMap contributors'
+        }).addTo(map);
+
+        // Ejemplo de un marcador (puedes borrarlo luego)
+        L.marker([32.5149, -117.0382]).addTo(map)
+            .bindPopup('Centro de Tijuana')
+            .openPopup();
+    </script>
+
+</body>
+</html>
