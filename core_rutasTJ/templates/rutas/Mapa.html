@@ -5,17 +5,22 @@
     <meta charset="UTF-8">
     <title>Mapa de Rutas TJ</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!--Iconos-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'rutas/css/mapa.css' %}">
 </head>
 <body>
 
     <header>
         <nav>
-            <strong>Rutas TJ</strong>
+            <div class="logo">
+                <i class="fas fa-bus"></i> Rutas TJ
+            </div>
             <ul>
                 <li><a href="{% url 'home' %}">Inicio</a></li>
                 <li><strong>Mapa</strong></li>
                 <li><a href="{% url 'contacto' %}">Contacto</a></li>
-                <li><a href="{% url 'login' %}">Iniciar sesion/Administrador</a></li>
+                <li><a href="{% url 'login' %}" class="btn-admin">Iniciar sesion/Administrador</a></li>
             </ul>
         </nav>
     </header>
@@ -27,13 +32,6 @@
 
     <section id="controles">
         <button onclick="limpiarMapa()">Limpiar Puntos</button>
-        
-        <div style="margin-top: 10px;">
-            <label>Visualizar Ruta:</label>
-            <select id="rutaSelect">
-                <option value="">-- Selecciona una ruta --</option>
-            </select>
-        </div>
     </section>
 
     <hr>

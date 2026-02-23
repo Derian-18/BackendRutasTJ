@@ -6,24 +6,28 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Panel de Administración - Rutas TJ</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!--Iconos-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'panel/css/administrador.css' %}">
 </head>
 <body>
 
     <header>
-    <nav>
-        <strong>Rutas TJ</strong>
-        <ul>
-            <li><a href="{% url 'home' %}">Inicio</a></li>
-            <li><a href="{% url 'mapa' %}">Mapa</a></li>
-            <li><a href="{% url 'contacto' %}">Contacto</a></li>
-            {% if user.is_authenticated %}
-                <li><a href="{% url 'logout' %}">Cerrar sesion</a></li>
-            {% else %}
-                <li><a href="{% url 'login' %}" class="btn-admin">Administrador</a></li>
-            {% endif %}
-        </ul>
-    </nav>
-</header>
+        <nav>
+            <div class="logo">
+                <i class="fas fa-bus"></i> Rutas TJ
+            </div>
+            <ul>
+                <li><a href="{% url 'home' %}">Inicio</a></li>
+                <li><a href="{% url 'mapa' %}">Mapa</a></li>
+                <li><a href="{% url 'contacto' %}">Contacto</a></li>
+                {% if user.is_authenticated %}
+                    <li><a href="{% url 'logout' %}">Cerrar sesion</a></li>
+                {% else %}
+                    <li><a href="{% url 'login' %}" class="btn-admin">Administrador</a></li>
+                {% endif %}
+        </nav>
+    </header>
 
 <main>
     <h1>Panel de Control de Rutas</h1>
@@ -34,13 +38,6 @@
         <input type="text" id="nombreRuta" placeholder="Nombre de la ruta">
         <button id="btn-terminar">Guardar Ruta desde Mapa</button>
         <button onclick="limpiarMapa()">Limpiar Puntos</button>
-        
-        <div style="margin-top: 10px;">
-            <label>Visualizar Ruta:</label>
-            <select id="rutaSelect">
-                <option value="">-- Selecciona una ruta --</option>
-            </select>
-        </div>
     </section>
 
     <hr>
