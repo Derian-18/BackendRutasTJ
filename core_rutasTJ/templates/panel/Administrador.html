@@ -3,124 +3,69 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Administrador</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - Rutas TJ</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 <body>
 
     <header>
-        <nav>
-            <strong>Rutas TJ</strong>
-            <ul>
-                <li><a href="{% url 'home' %}">Inicio</a></li>
-                <li><a href="{% url 'mapa' %}">Mapa</a></li>
-                <li><a href="{% url 'contacto' %}">Contacto</a></a></li>
-                <li><strong>Iniciar sesion/Administrador</strong></li>
-                {% if user.is_authenticated %}
-                    <a href="{% url 'logout' %}">Cerrar sesion</a>
-                {% else %}
-                    <a href="{% url 'login' %}" class="btn-admin">Administrador</a>
-                {% endif %}
-            </ul>
-        </nav>
-    </header>
+    <nav>
+        <strong>Rutas TJ</strong>
+        <ul>
+            <li><a href="{% url 'home' %}">Inicio</a></li>
+            <li><a href="{% url 'mapa' %}">Mapa</a></li>
+            <li><a href="{% url 'contacto' %}">Contacto</a></li>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'logout' %}">Cerrar sesion</a></li>
+            {% else %}
+                <li><a href="{% url 'login' %}" class="btn-admin">Administrador</a></li>
+            {% endif %}
+        </ul>
+    </nav>
+</header>
+
+<main>
+    <h1>Panel de Control de Rutas</h1>
+
+    <div id="map" style="height: 400px; width: 100%; margin-bottom: 20px;"></div>
+
+    <section id="controles">
+        <input type="text" id="nombreRuta" placeholder="Nombre de la ruta">
+        <button id="btn-terminar">Guardar Ruta desde Mapa</button>
+        <button onclick="limpiarMapa()">Limpiar Puntos</button>
+        
+        <div style="margin-top: 10px;">
+            <label>Visualizar Ruta:</label>
+            <select id="rutaSelect">
+                <option value="">-- Selecciona una ruta --</option>
+            </select>
+        </div>
+    </section>
 
     <hr>
 
-    <main>
-        <section>
-            <h1>Agrega unidades de transporte</h1>
-            <form>
-                <p>
-                    Ingresa el numero de unidad: 
-                    <input type="text">
-                </p>
-                <p>
-                    Numero-unidad: 
-                    <input type="text">
-                </p>
-                <p>Numero de tipo de la unidad</p>
-                <button type="button">Subrayar la ruta de la unidad</button>
-                <br><br>
-                <div style="width: 300px; height: 150px; border: 1px solid black; text-align: center;">
-                    <br>[Espacio Interactivo para el Mapa]
-                </div>
-                <br>
-                <button type="submit">Agregar</button>
-            </form>
-        </section>
-
-        <br>
-        <section>
-            <h2>Lista de unidades</h2>
-            <table border="1">
-                <thead>
-                    <tr>
-                        <th>Numero de unidad:</th>
-                        <th>Ruta</th>
-                        <th>Acciones</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>980</td>
-                        <td>5 Y 10</td>
-                        <td>
-                            <button type="button">Editar</button>
-                            <button type="button">Eliminar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>435</td>
-                        <td>Valle Verde</td>
-                        <td>
-                            <button type="button">Editar</button>
-                            <button type="button">Eliminar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>1245</td>
-                        <td>Mariano Matamoros</td>
-                        <td>
-                            <button type="button">Editar</button>
-                            <button type="button">Eliminar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>754</td>
-                        <td>Valle Verde</td>
-                        <td>
-                            <button type="button">Editar</button>
-                            <button type="button">Eliminar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>562</td>
-                        <td>Mariano Matamoros</td>
-                        <td>
-                            <button type="button">Editar</button>
-                            <button type="button">Eliminar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>235</td>
-                        <td>Valle Verde</td>
-                        <td>
-                            <button type="button">Editar</button>
-                            <button type="button">Eliminar</button>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>0782</td>
-                        <td>Mariano Matamoros</td>
-                        <td>
-                            <button type="button">Editar</button>
-                            <button type="button">Eliminar</button>
-                        </td>
-                    </tr>
+    <section id="tabla-seccion">
+        <h2>Listado de Rutas</h2>
+        <table border="1" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaRutas">
                 </tbody>
-            </table>
-        </section>
-    </main>
+        </table>
+    </section>
+</main>
 
+<footer>
+
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'panel/js/administrador.js' %}"></script>
 </body>
 </html>
