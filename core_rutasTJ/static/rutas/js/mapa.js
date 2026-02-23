@@ -113,10 +113,14 @@ if(selectElement) {
     });
 }
 
-/* ================= TABLA Y ELIMINACIÓN ================= */
+/* ================= TABLA Y ACCIONES ================= */
+
 function cargarTablaRutas() {
     fetch(ENDPOINTS.obtener)
-        .then(res => res.json())
+        .then(res => {
+            if (!res.ok) throw new Error('Error al obtener rutas');
+            return res.json();
+        })
         .then(rutas => {
             const tbody = document.getElementById('tablaRutas');
             if(!tbody) return;
@@ -124,16 +128,23 @@ function cargarTablaRutas() {
 
             rutas.forEach(ruta => {
                 const tr = document.createElement('tr');
+                
+                // Convertimos las coordenadas a string para pasarlas al botón
+                const coordsStr = JSON.stringify(ruta.coordenadas);
+
                 tr.innerHTML = `
                     <td>${ruta.id}</td>
                     <td>${ruta.nombre}</td>
                     <td>
-                        <button onclick="eliminarRuta(${ruta.id})">🗑️ Eliminar</button>
+                        <button onclick='mostrarRuta(${coordsStr})' style="background-color: #e1f5fe; cursor: pointer;">
+                            👁️ Ver en Mapa
+                        </button>
                     </td>
                 `;
                 tbody.appendChild(tr);
             });
-        });
+        })
+        .catch(err => console.error("Error al llenar la tabla:", err));
 }
 
 // Carga Inicial
