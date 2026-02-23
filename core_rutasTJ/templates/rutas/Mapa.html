@@ -5,55 +5,59 @@
     <meta charset="UTF-8">
     <title>Mapa de Rutas TJ</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!--Iconos-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="{% static 'rutas/css/mapa.css' %}">
 </head>
 <body>
 
     <header>
         <nav>
-            <strong>Rutas TJ</strong>
+            <div class="logo">
+                <i class="fas fa-bus"></i> Rutas TJ
+            </div>
             <ul>
                 <li><a href="{% url 'home' %}">Inicio</a></li>
                 <li><strong>Mapa</strong></li>
                 <li><a href="{% url 'contacto' %}">Contacto</a></li>
-                <li><a href="{% url 'login' %}">Iniciar sesion/Administrador</a></li>
+                <li><a href="{% url 'login' %}" class="btn-admin">Iniciar sesion/Administrador</a></li>
             </ul>
         </nav>
     </header>
 
-    <main style="display: flex;">
-        <aside style="width: 30%;">
-            <h3>Ingresa el numero de unidad</h3>
-            
-            <form>
-                <input type="text" placeholder="Ej. 987">
-                <button type="button">🔍</button>
-            </form>
+<main>
+    <h1>Panel de Control de Rutas</h1>
 
-            <div id="info-unidad" style="margin-top: 20px; padding: 10px; background: #f0f0f0;">
-                <p><strong>Unidad 987 - Mariano Matamoros</strong></p>
-                <button>Ver ruta</button>
-            </div>
-        </aside>
+    <div id="map" style="height: 400px; width: 100%; margin-bottom: 20px;"></div>
 
-        <section style="width: 70%;">
-            <div id="map" style="height: 500px; width: 100%; border: 1px solid #ccc;"></div>
-        </section>
-    </main>
+    <section id="controles">
+        <button onclick="limpiarMapa()">Limpiar Puntos</button>
+    </section>
 
-    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-    <script>
-        // Coordenadas aproximadas de Tijuana
-        var map = L.map('map').setView([32.5149, -117.0382], 12);
+    <hr>
 
-        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            attribution: '© OpenStreetMap contributors'
-        }).addTo(map);
+    <section id="tabla-seccion">
+        <h2>Listado de Rutas</h2>
+        <table border="1" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Nombre</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody id="tablaRutas">
+                </tbody>
+        </table>
+    </section>
+</main>
 
-        // Ejemplo de un marcador (puedes borrarlo luego)
-        L.marker([32.5149, -117.0382]).addTo(map)
-            .bindPopup('Centro de Tijuana')
-            .openPopup();
-    </script>
+<footer>
+
+</footer>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="{% static 'rutas/js/mapa.js' %}"></script>
 
 </body>
 </html>
