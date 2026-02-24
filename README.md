@@ -1,14 +1,71 @@
-## Proceso para hacer modificaciones
-Para poder hacer modificaciones en este proyecto se necesita clonar el proyecto con git clone y el codigo del repositorio
+# Rutas Tijuana 🚍
 
-Tienes que instalar los requerimientos con pip install -r requerements.txt
+### Que hace el proyecto?
+Guarda y gestiona todas las rutas del transporte público en Tijuana, ofreciendo un mapa interactivo y confiable para los ciudadanos que residen en la ciudad.
 
-Una vez que ya lo hayas clonado vas a hacer migraciones con python manage.py makemigrations y despues python manage.py migrate
+### Que problema resuelve?
+Elimina la incertidumbre de no saber qué transporte elegir para llegar a un destino específico en una ciudad con un sistema de rutas complejo.
 
-Para poder entrar al panel administrador, necesitas crear un superusuario con python manage.py createsuperuser e ingresar los datos que te pide.
+### Tecnologias principales
 
-Una vez que hayas hecho todo eso, ahora si, podras correr el proyecto localmente con python manage.py runserver.
+![Python](https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white)
+![Django](https://img.shields.io/badge/Django-092E20?style=for-the-badge&logo=django&logoColor=white)
+![HTML5](https://img.shields.io/badge/HTML5-E34F26?style=for-the-badge&logo=html5&logoColor=white)
+![CSS3](https://img.shields.io/badge/CSS3-1572B6?style=for-the-badge&logo=css3&logoColor=white)
+![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
 
-## A tener en cuenta
-Tienes que tener en cuenta que tienes que tener un entorno virtual y activarlo, despues, instalar las dependencias.
-Una vez ya clonado el repositorio, para que puedas hacer cambios tienes que crearte una rama, como se hace? con git checkout -b nombre-rama, luego git push -u origin nombre-rama que creaste para subirlo a github
+## Instalacion y configuracion local
+Sigue estos pasos para mmontar el entorno de desarrollo
+
+1. **Clona el repositorio:**
+   ```bash
+   # HTTPS
+   git clone https://github.com/Derian-18/BackendRutasTJ.git
+   ```
+   ```bash
+   # SSH
+   git clone git@github.com:Derian-18/BackendRutasTJ.git
+   ```
+
+2. **Crea y activa el entorno virtual**
+   ```bash
+   # Windows
+   python -m venv venv
+   .\venv\Scripts\activate
+
+   # Linux/Mac
+   python3 -m venv venv
+   source venv/bin/activate
+
+  3. **Instala las dependencias**
+     ```bash
+     pip install -r requirements.txt
+
+  4. **Configura la base de datos**
+     ```bash
+     python manage.py makemigrations
+     python manage.py migrate
+
+  5. **Crea un administrador**
+     ```bash
+     python manage.py createsuperuser
+
+  6. **Inicia el servidor**
+     ```bash
+     python manage.py runserver
+
+## Como contribuir
+Para mantener orden en el proyecto, sigue este flujo: <br>
+**Crea una rama para tu mejora:**
+```bash
+git checkout -b nombre-de-tu-rama
+```
+
+Realiza tus cambios y haz commit.
+
+**Sube tu rama:**
+```bash
+git push -u origin nombre-de-tu-rama
+```
+
+Abre un Pull Request en github.
