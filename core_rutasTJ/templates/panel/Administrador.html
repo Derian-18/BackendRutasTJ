@@ -24,7 +24,7 @@
             <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i> Mapa</a>
             <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i>Contacto</a>
             {% if user.is_authenticated %}
-                <li><a href="{% url 'logout' %}">Cerrar sesion</a></li>
+                <li><a href="{% url 'logout' %}" class="btn-admin">Cerrar sesion</a></li>
             {% else %}
                 <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
             {% endif %}
