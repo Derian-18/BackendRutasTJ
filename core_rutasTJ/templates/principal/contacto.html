@@ -6,68 +6,58 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rutas TJ - Contacto</title>
     <link rel="stylesheet" href="{% static 'principal/css/contacto.css' %}">
-    <!--Iconos-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <header>
-        <nav>
-            <div class="logo">
-                <i class="fas fa-bus"></i> Rutas TJ
+        <a href="{% url 'home' %}" class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-bus"></i>
             </div>
-            <ul>
-                <li><a href="{% url 'home' %}">Inicio</a></li>
-                <li><a href="{% url 'mapa' %}">Mapa</a></li>
-                <li><Strong>Contacto</Strong></a></li>
-                <li><a href="{% url 'login' %}" class="btn-admin">Iniciar sesion/Administrador</a></li>
-            </ul>
+            Rutas TJ
+        </a>
+        <nav>
+            <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
+            <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i> Mapa</a>
+            <a href="#"><i class="fas fa-envelope"></i> <strong>Contacto</strong></a>
+            <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
         </nav>
     </header>
 
-    <main>
-        <h1>Contacto</h1>
-        <p>¿Tienes alguna duda o sugerencia sobre las rutas de Tijuana? Escríbenos.</p>
-
-        <form action="" method="POST">
-            {% csrf_token %} <div>
-                <label for="nombre">Nombre:</label><br>
-                <input type="text" id="nombre" name="nombre" required>
+    {% if messages %}
+    <div class="messages">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }}">
+                {{ message }}
             </div>
+        {% endfor %}
+    </div>
+    {% endif %}
 
-            <br>
-
-            <div>
-                <label for="correo">Correo electrónico:</label><br>
-                <input type="email" id="correo" name="correo" required>
+    <main class="container">
+        <div class="contact-card">
+            <div class="penguin-image">
+                <img src="{% static 'principal/img/pinguino.png' %}" alt="Logo Rutas TJ">
             </div>
+            
+            <h1>Contacto</h1>
+            <p class="subtitle">¿Tienes alguna duda o sugerencia sobre las rutas de Tijuana?</p>
 
-            <br>
+            <form action="" method="POST">
+                {% csrf_token %}
+                <div class="form-row">
+                    <input type="text" name="nombre" placeholder="Tu nombre" required>
+                    <input type="email" name="correo" placeholder="Tu correo electrónico" required>
+                </div>
 
-            <div>
-                <label for="mensaje">Mensaje:</label><br>
-                <textarea id="mensaje" name="mensaje" rows="5" required></textarea>
-            </div>
+                <textarea name="mensaje" placeholder="Escribe tu mensaje aquí..." required></textarea>
 
-            <br>
-
-            <button type="submit">Enviar mensaje</button>
-        </form>
-
-        <hr>
-
-        <section>
-            <h3>Otros medios de contacto</h3>
-            <ul>
-                <li>📍 Ubicación: Tijuana, B.C.</li>
-                <li>📞 Teléfono: (664) 123-4567</li>
-                <li>📧 Email: info@rutastj.com</li>
-            </ul>
-        </section>
+                <button type="submit" class="submit-btn">Enviar mensaje</button>
+            </form>
+        </div>
     </main>
 
-    <footer>
-        <p>Todos los derechos reservados &copy; 2026</p>
-    </footer>
+    <div class="wave-bottom"></div>
 
 </body>
 </html>

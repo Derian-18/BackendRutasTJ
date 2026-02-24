@@ -12,16 +12,17 @@
 <body>
 
     <header>
-        <nav>
-            <div class="logo">
-                <i class="fas fa-bus"></i> Rutas TJ
+        <a href="{% url 'home' %}" class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-bus"></i>
             </div>
-            <ul>
-                <li><a href="{% url 'home' %}">Inicio</a></li>
-                <li><strong>Mapa</strong></li>
-                <li><a href="{% url 'contacto' %}">Contacto</a></li>
-                <li><a href="{% url 'login' %}" class="btn-admin">Iniciar sesion/Administrador</a></li>
-            </ul>
+            Rutas TJ
+        </a>
+        <nav>
+            <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
+            <a href="#"><i class="fas fa-map-marked-alt"></i><strong>Mapa</strong></a>
+            <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i>Contacto</a>
+            <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
         </nav>
     </header>
 

@@ -13,19 +13,21 @@
 <body>
 
     <header>
-        <nav>
-            <div class="logo">
-                <i class="fas fa-bus"></i> Rutas TJ
+        <a href="{% url 'home' %}" class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-bus"></i>
             </div>
-            <ul>
-                <li><a href="{% url 'home' %}">Inicio</a></li>
-                <li><a href="{% url 'mapa' %}">Mapa</a></li>
-                <li><a href="{% url 'contacto' %}">Contacto</a></li>
-                {% if user.is_authenticated %}
-                    <li><a href="{% url 'logout' %}">Cerrar sesion</a></li>
-                {% else %}
-                    <li><a href="{% url 'login' %}" class="btn-admin">Administrador</a></li>
-                {% endif %}
+            Rutas TJ
+        </a>
+        <nav>
+            <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
+            <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i> Mapa</a>
+            <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i>Contacto</a>
+            {% if user.is_authenticated %}
+                <li><a href="{% url 'logout' %}">Cerrar sesion</a></li>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
+            {% endif %}
         </nav>
     </header>
 

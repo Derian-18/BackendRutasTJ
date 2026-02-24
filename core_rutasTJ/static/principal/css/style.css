@@ -1,71 +1,102 @@
-/* Definición de colores azules */
-* {
-    --azul-oscuro: #002b5c; /* Color de la barra superior/botones */
-    --azul-claro: #eef4f8;  /* Color de fondo suave */
+/* ============================================
+   VARIABLES Y RESET
+   ============================================ */
+:root {
+    --azul-oscuro: #1e3c72;
+    --azul-brillante: #2a5298;
+    --azul-claro: #eef4f8;
     --blanco: #ffffff;
     --texto: #333333;
 }
 
-body {
+* {
     margin: 0;
     padding: 0;
-    font-family: 'Arial', sans-serif;
-    background-color: var(--azul-claro);
-    color: var(--texto);
+    box-sizing: border-box;
 }
 
-/* Header / Barra de Navegación */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    color: var(--texto);
+    background: linear-gradient(to bottom, #ffffff 0%, var(--azul-claro) 100%);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    overflow-x: hidden;
+}
+
+/* ============================================
+   HEADER Y NAVEGACIÓN (Estilo Moderno)
+   ============================================ */
 header {
     background-color: var(--azul-oscuro);
-    padding: 15px 5%;
+    padding: 1rem 5%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
     color: white;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--azul-oscuro);
 }
 
 nav {
     display: flex;
-    justify-content: space-between;
+    gap: 2rem;
     align-items: center;
-}
-
-.logo {
-    font-size: 24px;
-    font-weight: bold;
-    display: flex;
-    align-items: center;
-    gap: 10px;
-}
-
-nav ul {
-    list-style: none;
-    display: flex;
-    align-items: center;
-    margin: 0;
-    padding: 0;
-}
-
-nav ul li {
-    margin-left: 20px;
 }
 
 nav a, nav strong {
     color: white;
     text-decoration: none;
-    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    transition: opacity 0.3s;
+}
+
+nav a:hover {
+    opacity: 0.8;
 }
 
 .btn-admin {
-    border: 1px solid white;
-    padding: 5px 10px;
-    border-radius: 3px;
+    background-color: transparent;
+    border: 2px solid white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
 }
 
-/* Sección Principal (Hero) */
+/* ============================================
+   SECCIÓN HERO
+   ============================================ */
 .hero {
     display: flex;
     align-items: center;
-    padding: 40px 10%;
+    padding: 60px 10%;
     gap: 40px;
     flex-wrap: wrap;
+    flex: 1;
 }
 
 .hero-img {
@@ -75,8 +106,8 @@ nav a, nav strong {
 
 .hero-img img {
     width: 100%;
-    border-radius: 8px;
-    box-shadow: 10px 10px 0px rgba(0, 0, 0, 0.1);
+    border-radius: 12px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .hero-text {
@@ -85,68 +116,71 @@ nav a, nav strong {
 }
 
 .hero-text h1 {
-    font-size: 32px;
+    font-size: 2.5rem;
+    color: var(--azul-oscuro);
     margin-bottom: 20px;
     line-height: 1.2;
 }
 
 .hero-text p {
-    font-size: 16px;
+    font-size: 1.1rem;
     line-height: 1.6;
     margin-bottom: 30px;
-}
-
-.btn-mapa {
-    background-color: var(--azul-oscuro);
-    color: white;
-    padding: 12px 25px;
-    text-decoration: none;
-    font-weight: bold;
-    border-radius: 8px;
-    display: inline-block;
-}
-
-/* Sección de Características (Iconos) */
-.features {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 20px;
-    padding: 40px 10%;
-    text-align: center;
-}
-
-.feature-item {
-    padding: 20px;
-}
-
-.feature-item i {
-    font-size: 40px;
-    margin-bottom: 15px;
-    display: block;
-}
-
-.feature-item h3 {
-    font-size: 18px;
-    margin-bottom: 10px;
-}
-
-.feature-item p {
-    font-size: 14px;
     color: #555;
 }
 
-/* Footer */
+.btn-mapa {
+    background: var(--azul-oscuro);
+    color: white;
+    padding: 15px 30px;
+    text-decoration: none;
+    font-weight: bold;
+    border-radius: 6px;
+    display: inline-block;
+    transition: transform 0.2s, background 0.3s;
+}
+
+.btn-mapa:hover {
+    background: var(--azul-brillante);
+    transform: translateY(-2px);
+}
+
+/* ============================================
+   CARACTERÍSTICAS
+   ============================================ */
+.features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 30px;
+    padding: 60px 10%;
+    text-align: center;
+    background: white;
+}
+
+.feature-item i {
+    font-size: 2.5rem;
+    color: var(--azul-oscuro);
+    margin-bottom: 15px;
+}
+
+.feature-item h3 {
+    margin-bottom: 10px;
+    color: var(--azul-oscuro);
+}
+
+/* ============================================
+   FOOTER
+   ============================================ */
 footer {
     background-color: var(--azul-oscuro);
     color: white;
     text-align: center;
-    padding: 10px 0;
-    margin-top: 20px;
+    padding: 20px 0;
 }
 
-/* Estilos para que se parezca al diseño de la imagen */
-hr {
-    border: 0;
-    border-top: 1px solid #ccc;
-    margin: 0 10%;
+/* Responsivo */
+@media (max-width: 768px) {
+    header { flex-direction: column; gap: 1rem; }
+    nav { gap: 1rem; flex-wrap: wrap; justify-content: center; }
+    .hero { text-align: center; padding: 40px 5%; }
 }

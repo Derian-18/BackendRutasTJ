@@ -1,45 +1,87 @@
-/* Configuracion General */
+/* ============================================
+   RESET Y CONFIGURACIÓN GENERAL
+   ============================================ */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
 body {
-    background-color: #f0f5f9;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
     color: #333;
+    background: linear-gradient(to bottom, #ffffff 0%, #ffffff 100%);
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    min-height: 100vh;
+    position: relative;
+    overflow-x: hidden;
 }
 
-/* Navegación */
-nav {
-    background-color: #003366; /* Azul Oscuro */
-    color: white;
-    padding: 1rem 2rem;
+/* ============================================
+   HEADER Y NAVEGACIÓN (UNIFICADO)
+   ============================================ */
+header {
+    background-color: #1e3c72; /* O var(--azul-oscuro) */
+    padding: 1rem 5%; /* El margen lateral ahora es siempre el 5% */
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    z-index: 100;
+    width: 100%;
 }
 
-nav ul {
-    list-style: none;
+.logo {
     display: flex;
-    gap: 20px;
+    align-items: center;
+    gap: 0.75rem;
+    color: white;
+    text-decoration: none;
+    font-size: 1.5rem;
+    font-weight: bold;
+}
+
+.logo-icon {
+    width: 40px;
+    height: 40px;
+    background-color: white;
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #1e3c72;
+}
+
+nav {
+    display: flex;
+    gap: 2rem;
     align-items: center;
 }
 
-nav a {
-    color: #add8e6;
+nav a, nav strong {
+    color: white;
     text-decoration: none;
-    transition: color 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 1rem;
+    transition: opacity 0.3s;
+    white-space: nowrap; /* Evita que el texto salte de línea y cambie el alto */
 }
 
 nav a:hover {
+    opacity: 0.8;
+}
+
+.btn-admin {
+    background-color: transparent;
+    border: 2px solid white;
+    padding: 0.5rem 1.5rem;
+    border-radius: 4px;
+    cursor: pointer;
     color: white;
+    text-decoration: none;
 }
 
 /* Encabezado del Formulario */

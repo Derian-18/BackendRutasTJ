@@ -6,21 +6,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Rutas TJ - Pagina Inicial</title>
     <link rel="stylesheet" href="{% static 'principal/css/style.css' %}">
-    <!--Iconos-->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <header>
-        <nav>
-            <div class="logo">
-                <i class="fas fa-bus"></i> Rutas TJ
+        <a href="{% url 'home' %}" class="logo">
+            <div class="logo-icon">
+                <i class="fas fa-bus"></i>
             </div>
-            <ul>
-                <li><strong>Inicio</strong></li>
-                <li><a href="{% url 'mapa' %}">Mapa</a></li>
-                <li><a href="{% url 'contacto' %}">Contacto</a></li>
-                <li><a href="{% url 'login' %}" class="btn-admin">Iniciar sesion/Administrador</a></li>
-            </ul>
+            Rutas TJ
+        </a>
+        <nav>
+            <strong><i class="fas fa-home"></i> Inicio</strong>
+            <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i> Mapa</a>
+            <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i> Contacto</a>
+            <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
         </nav>
     </header>
 
@@ -39,8 +39,6 @@
                 <a href="{% url 'mapa' %}" class="btn-mapa">VER RUTAS EN EL MAPA</a>
             </div>
         </section>
-
-        <hr>
 
         <section class="features">
             <div class="feature-item">
