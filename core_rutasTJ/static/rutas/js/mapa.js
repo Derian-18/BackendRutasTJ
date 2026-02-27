@@ -1,20 +1,44 @@
 /* ================= CONFIGURACIÓN MAPA ================= */
-const map = L.map('map').setView([32.5255, -117.0335], 13);
 
+// 1️⃣ Definir límites de la ciudad (aproximados)
+const southWest = L.latLng(32.45, -117.15);
+const northEast = L.latLng(32.60, -116.85);
+const bounds = L.latLngBounds(southWest, northEast);
+
+// 2️⃣ Crear mapa con restricciones
+const map = L.map('map', {
+    center: [32.5255, -117.0335],
+    zoom: 13,
+    minZoom: 12,
+    maxZoom: 18,
+    maxBounds: bounds,
+    maxBoundsViscosity: 1.0
+});
+
+// 3️⃣ Agregar capa
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
+    minZoom: 12,
+    maxZoom: 18
 }).addTo(map);
+
+// 4️⃣ Ajustar vista exactamente al área
+map.fitBounds(bounds);
 
 /* ================= VARIABLES GLOBALES ================= */
 let puntos = [];
 let markers = [];
 let rutaActual = null;
+let circuloA = null;
+let circuloB = null;
+let lineaConexionA = null;
+let lineaConexionB = null;
 
 // Rutas configuradas manualmente (Ajusta según tu urls.py si es necesario)
 const ENDPOINTS = {
     guardar: '/panel/guardar-ruta/',
     obtener: '/panel/obtener-rutas/',
-    eliminar: (id) => `/panel/eliminar-ruta/${id}/`
+    eliminar: (id) => `/panel/eliminar-ruta/${id}/`,
+    calcular: '/rutas/calcular-ruta/',
 };
 
 function getCookie(name) {
@@ -66,6 +90,121 @@ function limpiarMapa() {
     markers = [];
     puntos = [];
     if (rutaActual) map.removeLayer(rutaActual);
+    if (circuloA) map.removeLayer(circuloA);
+    if (circuloB) map.removeLayer(circuloB);
+    if (lineaConexionA) map.removeLayer(lineaConexionA);
+    if (lineaConexionB) map.removeLayer(lineaConexionB);
+}
+
+function calcularRutaOptima() {
+
+    if (puntos.length !== 2) {
+        alert("Debes seleccionar Punto A y Punto B");
+        return;
+    }
+
+    const [latA, lonA] = puntos[0];
+    const [latB, lonB] = puntos[1];
+
+    fetch(ENDPOINTS.calcular, {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+            "X-CSRFToken": csrftoken
+        },
+        body: JSON.stringify({
+            latA: latA,
+            lonA: lonA,
+            latB: latB,
+            lonB: lonB
+        })
+    })
+    .then(res => {
+        if (!res.ok) throw new Error("No se pudo calcular la ruta");
+        return res.json();
+    })
+    .then(data => {
+
+        if (!data.ruta_optima) {
+            alert("No se encontró ruta");
+            return;
+        }
+
+        dibujarRutaOptima(data.ruta_optima);
+        dibujarRadiosYConexiones(data);
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        alert("Error al calcular ruta");
+    });
+}
+
+function dibujarRutaOptima(ruta) {
+
+    if (rutaActual) map.removeLayer(rutaActual);
+
+    let coordenadas = [];
+
+    ruta.forEach(paso => {
+        if (paso.tipo === "parada") {
+            coordenadas.push([paso.latitud, paso.longitud]);
+        }
+    });
+
+    rutaActual = L.polyline(coordenadas, {
+        color: 'blue',
+        weight: 6
+    }).addTo(map);
+
+    map.fitBounds(rutaActual.getBounds());
+}
+
+function dibujarRadiosYConexiones(data) {
+
+    // Limpiar anteriores
+    if (circuloA) map.removeLayer(circuloA);
+    if (circuloB) map.removeLayer(circuloB);
+    if (lineaConexionA) map.removeLayer(lineaConexionA);
+    if (lineaConexionB) map.removeLayer(lineaConexionB);
+
+    const [latA, lonA] = puntos[0];
+    const [latB, lonB] = puntos[1];
+
+    const paradaInicio = data.origen;
+    const paradaFin = data.destino;
+
+    // 🔵 Dibujar radio 500m
+    circuloA = L.circle([latA, lonA], {
+        radius: 500,
+        color: 'green',
+        fillOpacity: 0.1
+    }).addTo(map);
+
+    circuloB = L.circle([latB, lonB], {
+        radius: 500,
+        color: 'red',
+        fillOpacity: 0.1
+    }).addTo(map);
+
+    // 🟢 Línea Punto A → Parada encontrada
+    lineaConexionA = L.polyline([
+        [latA, lonA],
+        [paradaInicio.latitud, paradaInicio.longitud]
+    ], {
+        color: 'green',
+        dashArray: '5,5',
+        weight: 4
+    }).addTo(map);
+
+    // 🔴 Línea Parada final → Punto B
+    lineaConexionB = L.polyline([
+        [paradaFin.latitud, paradaFin.longitud],
+        [latB, lonB]
+    ], {
+        color: 'red',
+        dashArray: '5,5',
+        weight: 4
+    }).addTo(map);
 }
 
 /* ================= CARGAR Y MOSTRAR ================= */
