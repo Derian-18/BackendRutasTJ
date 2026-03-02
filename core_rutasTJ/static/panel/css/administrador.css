@@ -175,3 +175,159 @@ hr {
     border-top: 1px solid #ccc;
     margin: 0 10%;
 }
+
+/* ============================================
+   PANEL ADMINISTRADOR - ESTILOS ADICIONALES
+   ============================================ */
+
+/* Main */
+main {
+    flex: 1;
+    padding: 40px 10%;
+}
+
+main h1 {
+    font-size: 28px;
+    margin-bottom: 25px;
+    color: #1e3c72;
+}
+
+/* ============================================
+   MAPA
+   ============================================ */
+
+#map {
+    height: 450px;
+    width: 100%;
+    border-radius: 10px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.08);
+    margin-bottom: 30px;
+}
+
+/* ============================================
+   CONTROLES (INPUT + BOTONES)
+   ============================================ */
+
+#controles {
+    display: flex;
+    gap: 15px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+#nombreRuta {
+    padding: 12px 15px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    min-width: 250px;
+    font-size: 14px;
+    transition: all 0.3s ease;
+}
+
+#nombreRuta:focus {
+    outline: none;
+    border-color: #1e3c72;
+    box-shadow: 0 0 0 3px rgba(30, 60, 114, 0.1);
+}
+
+/* Botones del panel */
+#controles button {
+    background-color: #1e3c72;
+    color: white;
+    padding: 12px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+#controles button:hover {
+    background-color: #16325c;
+    transform: translateY(-2px);
+}
+
+/* Botón limpiar gris */
+#controles button:last-child {
+    background-color: #555;
+}
+
+#controles button:last-child:hover {
+    background-color: #333;
+}
+
+/* ============================================
+   TABLA ADMIN
+   ============================================ */
+
+#tabla-seccion {
+    margin-top: 30px;
+    padding: 0 10%;
+}
+
+#tabla-seccion h2 {
+    font-size: 22px;
+    margin-bottom: 20px;
+    color: #1e3c72;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.06);
+}
+
+thead {
+    background-color: #1e3c72;
+    color: white;
+}
+
+thead th {
+    padding: 14px;
+    text-align: left;
+}
+
+tbody td {
+    padding: 12px 14px;
+    border-bottom: 1px solid #eee;
+}
+
+tbody tr:hover {
+    background-color: #f5f7fb;
+    transition: 0.2s;
+}
+
+/* ============================================
+   RESPONSIVE
+   ============================================ */
+
+@media (max-width: 768px) {
+
+    main {
+        padding: 30px 5%;
+    }
+
+    #controles {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    #nombreRuta {
+        width: 100%;
+    }
+
+    #controles button {
+        width: 100%;
+    }
+
+    #tabla-seccion {
+        padding: 0 5%;
+    }
+
+    main h1 {
+        font-size: 22px;
+    }
+}

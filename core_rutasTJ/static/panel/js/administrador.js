@@ -1,9 +1,28 @@
 /* ================= CONFIGURACIÓN MAPA ================= */
-const map = L.map('map').setView([32.5255, -117.0335], 13);
 
+// 1️⃣ Definir límites de la ciudad (aproximados)
+const southWest = L.latLng(32.45, -117.15);
+const northEast = L.latLng(32.60, -116.85);
+const bounds = L.latLngBounds(southWest, northEast);
+
+// 2️⃣ Crear mapa con restricciones
+const map = L.map('map', {
+    center: [32.5255, -117.0335],
+    zoom: 13,
+    minZoom: 12,
+    maxZoom: 18,
+    maxBounds: bounds,
+    maxBoundsViscosity: 1.0
+});
+
+// 3️⃣ Agregar capa
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19
+    minZoom: 12,
+    maxZoom: 18
 }).addTo(map);
+
+// 4️⃣ Ajustar vista exactamente al área
+map.fitBounds(bounds);
 
 /* ================= VARIABLES GLOBALES ================= */
 let puntos = [];

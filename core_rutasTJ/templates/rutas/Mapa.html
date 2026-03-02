@@ -32,7 +32,15 @@
     <div id="map" style="height: 400px; width: 100%; margin-bottom: 20px;"></div>
 
     <section id="controles">
-        <button onclick="limpiarMapa()">Limpiar Puntos</button>
+        <!-- FIX: id="btnCalcular" necesario para el spinner de carga en mapa.js -->
+        <button id="btnCalcular" type="button" onclick="calcularRutaOptima()">
+            Calcular Ruta
+        </button>
+
+        <!-- FIX: Botón duplicado eliminado — ambos llamaban a limpiarMapa() -->
+        <button onclick="limpiarMapa()">
+                Limpiar
+        </button>
     </section>
 
     <hr>
@@ -48,7 +56,7 @@
                 </tr>
             </thead>
             <tbody id="tablaRutas">
-                </tbody>
+            </tbody>
         </table>
     </section>
 </main>
