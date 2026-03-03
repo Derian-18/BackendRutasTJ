@@ -58,7 +58,7 @@ Sigue estos pasos para mmontar el entorno de desarrollo
 Para mantener orden en el proyecto, sigue este flujo: <br>
 **Crea una rama para tu mejora:**
 ```bash
-git checkout -b nombre-de-tu-rama
+git switch -c nombre-de-tu-rama
 ```
 
 Realiza tus cambios y haz commit.
@@ -68,4 +68,4 @@ Realiza tus cambios y haz commit.
 git push -u origin nombre-de-tu-rama
 ```
 
-Abre un Pull Request en github.
+Despues abre un Pull Request en github.
