@@ -54,6 +54,17 @@ Sigue estos pasos para mmontar el entorno de desarrollo
      ```bash
      python manage.py runserver
 
+## Y el .env?
+A la altura de manage.py se crea el .env el cual te tiene que quedar exactamente igual a el .env.example. Para crear la SECRET_KEY tienes que colocar este comando en tu terminal:
+```bash
+python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
+Despues, la clave que te de la colocas asi, dentro de las comillas:
+```bash
+SECRET_KEY='tu_llave_secreta'
+```
+
 ## Como contribuir
 Para mantener orden en el proyecto, sigue este flujo: <br>
 **Crea una rama para tu mejora:**
