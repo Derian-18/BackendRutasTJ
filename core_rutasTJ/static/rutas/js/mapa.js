@@ -35,9 +35,7 @@ let lineaConexionB = null;
 
 // Rutas configuradas manualmente (Ajusta según tu urls.py si es necesario)
 const ENDPOINTS = {
-    guardar: '/panel/guardar-ruta/',
-    obtener: '/panel/obtener-rutas/',
-    eliminar: (id) => `/panel/eliminar-ruta/${id}/`,
+    obtener: '/rutas/obtener-rutas-usuario/',
     calcular: '/rutas/calcular-ruta/',
 };
 
