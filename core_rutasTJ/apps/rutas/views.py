@@ -3,10 +3,14 @@ from apps.principal.models import Parada, Ruta, Conexion
 import math, heapq, json, traceback
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
+from apps.principal.services import obtener_rutas_data
 
 
 def mapa_view(request):
     return render(request, 'rutas/Mapa.html')
+
+def obtener_rutas_user(request):
+    return JsonResponse(obtener_rutas_data(), safe=False)
 
 
 # ==================== HAVERSINE ====================

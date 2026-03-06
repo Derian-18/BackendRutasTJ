@@ -1,11 +1,9 @@
-/* ================= CONFIGURACIÓN MAPA ================= */
+//* ================= CONFIGURACIÓN MAPA ================= */
 
-// 1️⃣ Definir límites de la ciudad (aproximados)
 const southWest = L.latLng(32.45, -117.15);
 const northEast = L.latLng(32.60, -116.85);
-const bounds = L.latLngBounds(southWest, northEast);
+const bounds    = L.latLngBounds(southWest, northEast);
 
-// 2️⃣ Crear mapa con restricciones
 const map = L.map('map', {
     center: [32.5255, -117.0335],
     zoom: 13,
@@ -15,29 +13,24 @@ const map = L.map('map', {
     maxBoundsViscosity: 1.0
 });
 
-// 3️⃣ Agregar capa
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: 12,
     maxZoom: 18
 }).addTo(map);
 
-// 4️⃣ Ajustar vista exactamente al área
 map.fitBounds(bounds);
 
 /* ================= VARIABLES GLOBALES ================= */
-let puntos = [];
-let markers = [];
-let rutaActual = null;
-let circuloA = null;
-let circuloB = null;
+let puntos        = [];
+let markers       = [];
+let rutaActual    = null;
+let circuloA      = null;
+let circuloB      = null;
 let lineaConexionA = null;
 let lineaConexionB = null;
 
-// Rutas configuradas manualmente (Ajusta según tu urls.py si es necesario)
 const ENDPOINTS = {
-    guardar: '/panel/guardar-ruta/',
-    obtener: '/panel/obtener-rutas/',
-    eliminar: (id) => `/panel/eliminar-ruta/${id}/`,
+    obtener:  '/rutas/obtener-rutas-usuario/',
     calcular: '/rutas/calcular-ruta/',
 };
 
@@ -58,7 +51,6 @@ function getCookie(name) {
 const csrftoken = getCookie('csrftoken');
 
 /* ================= ICONOS PERSONALIZADOS ================= */
-// FIX: Usar iconos propios en vez de manipular _icon directamente (evita null errors)
 const iconoVerde = L.divIcon({
     className: '',
     html: `<div style="
@@ -89,9 +81,8 @@ const iconoRojo = L.divIcon({
     popupAnchor: [0, -24]
 });
 
-/* ================= CLICK MAPA (PUNTO A y PUNTO B) ================= */
+/* ================= CLICK MAPA ================= */
 map.on('click', function(e) {
-    // Si ya tenemos 2 puntos, no permitir más clics
     if (puntos.length >= 2) {
         alert("Ya has seleccionado origen y destino. Haz clic en 'Limpiar' para reiniciar.");
         return;
@@ -101,26 +92,28 @@ map.on('click', function(e) {
     puntos.push([lat, lng]);
 
     const esOrigen = puntos.length === 1;
-    const titulo = esOrigen ? 'Punto A (Origen)' : 'Punto B (Destino)';
-    const icono  = esOrigen ? iconoVerde : iconoRojo;
+    const titulo   = esOrigen ? 'Punto A (Origen)' : 'Punto B (Destino)';
+    const icono    = esOrigen ? iconoVerde : iconoRojo;
 
-    // FIX: Usar iconos personalizados, sin tocar _icon directamente
     const marker = L.marker([lat, lng], { title: titulo, icon: icono }).addTo(map);
     markers.push(marker);
 });
 
 /* ================= LIMPIAR ================= */
-// FIX: Resetear variables a null después de removeLayer
 function limpiarMapa() {
     markers.forEach(m => map.removeLayer(m));
     markers = [];
-    puntos = [];
+    puntos  = [];
 
     if (rutaActual)     { map.removeLayer(rutaActual);     rutaActual     = null; }
     if (circuloA)       { map.removeLayer(circuloA);       circuloA       = null; }
     if (circuloB)       { map.removeLayer(circuloB);       circuloB       = null; }
     if (lineaConexionA) { map.removeLayer(lineaConexionA); lineaConexionA = null; }
     if (lineaConexionB) { map.removeLayer(lineaConexionB); lineaConexionB = null; }
+
+    // Limpiar panel de itinerario
+    const panel = document.getElementById('itinerario');
+    if (panel) panel.innerHTML = '';
 }
 
 /* ================= CALCULAR RUTA ================= */
@@ -133,10 +126,9 @@ function calcularRutaOptima() {
     const [latA, lonA] = puntos[0];
     const [latB, lonB] = puntos[1];
 
-    // FIX: Feedback visual mientras se calcula
     const btn = document.getElementById('btnCalcular');
     if (btn) {
-        btn.disabled = true;
+        btn.disabled    = true;
         btn.textContent = 'Calculando...';
     }
 
@@ -148,13 +140,9 @@ function calcularRutaOptima() {
         },
         body: JSON.stringify({ latA, lonA, latB, lonB })
     })
-    .then(res => {
-        // Siempre parsear JSON, incluso en errores 4xx/5xx
-        return res.json().then(data => ({ ok: res.ok, data }));
-    })
+    .then(res => res.json().then(data => ({ ok: res.ok, data })))
     .then(({ ok, data }) => {
         if (!ok) {
-            // Mostrar el mensaje real del backend (ej: "No hay paradas dentro de 2km")
             alert(data.error || "No se pudo calcular la ruta");
             return;
         }
@@ -164,20 +152,21 @@ function calcularRutaOptima() {
         }
         dibujarRutaOptima(data.ruta_optima);
         dibujarRadiosYConexiones(data);
+        mostrarItinerario(data);  // ← muestra nombres de rutas y transbordos
     })
     .catch(err => {
         console.error("Error:", err);
         alert("Error de conexión al servidor");
     })
     .finally(() => {
-        // FIX: Restaurar botón siempre, tanto en éxito como en error
         if (btn) {
-            btn.disabled = false;
+            btn.disabled    = false;
             btn.textContent = 'Calcular ruta';
         }
     });
 }
 
+/* ================= DIBUJAR RUTA ================= */
 function dibujarRutaOptima(ruta) {
     if (rutaActual) { map.removeLayer(rutaActual); rutaActual = null; }
 
@@ -195,8 +184,8 @@ function dibujarRutaOptima(ruta) {
     map.fitBounds(rutaActual.getBounds());
 }
 
+/* ================= DIBUJAR RADIOS Y CONEXIONES ================= */
 function dibujarRadiosYConexiones(data) {
-    // Limpiar capas anteriores y resetear a null
     if (circuloA)       { map.removeLayer(circuloA);       circuloA       = null; }
     if (circuloB)       { map.removeLayer(circuloB);       circuloB       = null; }
     if (lineaConexionA) { map.removeLayer(lineaConexionA); lineaConexionA = null; }
@@ -208,7 +197,6 @@ function dibujarRadiosYConexiones(data) {
     const paradaInicio = data.origen;
     const paradaFin    = data.destino;
 
-    // FIX: Radio máximo real del backend (2000m), no 500m fijo
     circuloA = L.circle([latA, lonA], {
         radius: 2000,
         color: 'green',
@@ -221,29 +209,84 @@ function dibujarRadiosYConexiones(data) {
         fillOpacity: 0.07
     }).addTo(map);
 
-    // Línea Punto A → Parada encontrada
     lineaConexionA = L.polyline([
         [latA, lonA],
         [paradaInicio.latitud, paradaInicio.longitud]
-    ], {
-        color: 'green',
-        dashArray: '5,5',
-        weight: 4
-    }).addTo(map);
+    ], { color: 'green', dashArray: '5,5', weight: 4 }).addTo(map);
 
-    // Línea Parada final → Punto B
     lineaConexionB = L.polyline([
         [paradaFin.latitud, paradaFin.longitud],
         [latB, lonB]
-    ], {
-        color: 'red',
-        dashArray: '5,5',
-        weight: 4
-    }).addTo(map);
+    ], { color: 'red', dashArray: '5,5', weight: 4 }).addTo(map);
 }
 
-/* ================= CARGAR RUTAS (una sola petición) ================= */
-// FIX: Unificar cargarRutas y cargarTablaRutas en una sola llamada fetch
+/* ================= ITINERARIO CON NOMBRES DE RUTAS ================= */
+function mostrarItinerario(data) {
+    const panel = document.getElementById('itinerario');
+    if (!panel) return;
+
+    const transbordos = data.ruta_optima.filter(p => p.tipo === 'transbordo');
+
+    let html = `
+        <div style="
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 16px;
+            margin-top: 16px;
+            font-family: sans-serif;
+        ">
+            <h3 style="margin: 0 0 12px 0; color: #1e293b;">
+                🗺️ Itinerario
+                <span style="font-size: 13px; font-weight: normal; color: #64748b;">
+                    — ${data.total_paradas} paradas · ${transbordos.length} transbordo(s)
+                </span>
+            </h3>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+    `;
+
+    // Origen
+    html += `
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:18px;">🟢</span>
+            <span><strong>Origen:</strong> ${data.origen.nombre}</span>
+        </div>
+    `;
+
+    // Rutas y transbordos
+    transbordos.forEach((t, i) => {
+        html += `
+            <div style="
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: #fef9c3;
+                border-left: 4px solid #eab308;
+                padding: 8px 12px;
+                border-radius: 4px;
+            ">
+                <span style="font-size:16px;">🚌</span>
+                <span>
+                    ${i === 0 ? '<strong>Tomar ruta:</strong>' : '<strong>Transbordo → tomar ruta:</strong>'}
+                    <strong style="color:#92400e;"> ${t.ruta}</strong>
+                </span>
+            </div>
+        `;
+    });
+
+    // Destino
+    html += `
+        <div style="display:flex; align-items:center; gap:8px;">
+            <span style="font-size:18px;">🔴</span>
+            <span><strong>Destino:</strong> ${data.destino.nombre}</span>
+        </div>
+    `;
+
+    html += `</div></div>`;
+    panel.innerHTML = html;
+}
+
+/* ================= CARGAR RUTAS ================= */
 function cargarRutas() {
     fetch(ENDPOINTS.obtener)
         .then(res => {
@@ -262,7 +305,6 @@ function llenarSelect(rutas) {
     if (!select) return;
 
     select.innerHTML = '<option value="">-- Selecciona una ruta --</option>';
-
     rutas.forEach(ruta => {
         const option = document.createElement('option');
         option.value = ruta.id;
@@ -277,10 +319,8 @@ function llenarTabla(rutas) {
     if (!tbody) return;
 
     tbody.innerHTML = '';
-
     rutas.forEach(ruta => {
-        const tr = document.createElement('tr');
-
+        const tr       = document.createElement('tr');
         const tdId     = document.createElement('td');
         const tdNombre = document.createElement('td');
         const tdAccion = document.createElement('td');
@@ -288,9 +328,8 @@ function llenarTabla(rutas) {
         tdId.textContent     = ruta.id;
         tdNombre.textContent = ruta.nombre;
 
-        // FIX: Usar addEventListener en lugar de onclick con innerHTML (evita XSS)
         const btn = document.createElement('button');
-        btn.textContent = '👁️ Ver en Mapa';
+        btn.textContent   = '👁️ Ver en Mapa';
         btn.style.cssText = 'background-color:#e1f5fe; cursor:pointer;';
         btn.addEventListener('click', () => mostrarRuta(ruta.coordenadas));
 
@@ -306,11 +345,7 @@ function mostrarRuta(coordenadas) {
     if (rutaActual) { map.removeLayer(rutaActual); rutaActual = null; }
     if (!coordenadas || coordenadas.length === 0) return;
 
-    rutaActual = L.polyline(coordenadas, {
-        color: 'blue',
-        weight: 5
-    }).addTo(map);
-
+    rutaActual = L.polyline(coordenadas, { color: 'blue', weight: 5 }).addTo(map);
     map.fitBounds(rutaActual.getBounds());
 }
 
