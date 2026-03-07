@@ -11,6 +11,25 @@
 </head>
 
 <body>
+    <!-- Contenedor de notificaciones (Movido al inicio para evitar conflictos de layout) -->
+    <div id="toast-container" class="toast-container">
+        {% if messages %}
+            {% for message in messages %}
+                <div class="toast {{ message.tags }}" role="alert">
+                    <div class="toast-content">
+                        <span class="toast-icon">
+                            {% if message.tags == 'success' %}
+                            {% elif message.tags == 'error' %}
+                            {% else %} ℹ️ {% endif %}
+                        </span>
+                        <span class="toast-msg">{{ message }}</span>
+                    </div>
+                    <button class="toast-close" onclick="this.parentElement.remove()">×</button>
+                </div>
+            {% endfor %}
+        {% endif %}
+    </div>
+
     <header>
         <a href="{% url 'home' %}" class="logo">
             <div class="logo-icon">
@@ -21,26 +40,21 @@
         <nav>
             <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
             <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i> Mapa</a>
-            <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i>Contacto</a>
+            <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i> Contacto</a>
             <a href="#" class="btn-admin"><strong>Iniciar sesión</strong></a>
         </nav>
     </header>
 
     <main>
         <h2>Iniciar sesión</h2>
-        {% if messages %}
-            {% for message in messages %}
-                <p class="error-msg">{{ message }}</p>
-            {% endfor %}
-        {% endif %}
-
+        
         <form method="POST">
             {% csrf_token %}
             <label for="user">Usuario:</label>
-            <input type="text" id="user" name="username" placeholder="Tu usuario">
+            <input type="text" id="user" name="username" placeholder="Tu usuario" required>
 
             <label for="pass">Contraseña:</label>
-            <input type="password" id="pass" name="password" placeholder="********">
+            <input type="password" id="pass" name="password" placeholder="********" required>
 
             <button type="submit">Entrar</button>
         </form>
@@ -49,5 +63,27 @@
     <footer>
         &copy; {% now "Y" %} Rutas TJ - Todos los derechos reservados.
     </footer>
+
+    <script>
+        /**
+         * Maneja el auto-cierre de las notificaciones
+         */
+        document.addEventListener('DOMContentLoaded', () => {
+            const toasts = document.querySelectorAll('.toast');
+
+            toasts.forEach(toast => {
+                // 1. Programar la desaparición visual (después de 4 segundos)
+                setTimeout(() => {
+                    toast.classList.add('hide');
+                    
+                    // 2. Eliminar el elemento del DOM completamente (después de la animación)
+                    setTimeout(() => {
+                        toast.remove();
+                    }, 400); 
+
+                }, 4000);
+            });
+        });
+    </script>
 </body>
 </html>
