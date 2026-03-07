@@ -12,6 +12,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 from decouple import config
+import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -23,7 +25,11 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']
+
+CSRF_TRUSTED_ORIGINS = [
+    'https://predicatory-unfully-joann.ngrok-free.dev',
+]
 
 
 # Application definition
@@ -123,14 +129,23 @@ STATICFILES_DIRS = [
 
 STATICFILES_DIRS = [BASE_DIR / 'static']
 
+load_dotenv()
+
 # Configuración básica
 SECRET_KEY = config('SECRET_KEY')
 DEBUG = config('DEBUG', default=False, cast=bool)
 
-# Configuración de Email
+# settings.py
+
+# Carga de variables (asegúrate de tener load_dotenv() arriba)
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = config('EMAIL_HOST')
-EMAIL_PORT = config('EMAIL_PORT', cast=int)
-EMAIL_USE_TLS = config('EMAIL_USE_TLS', cast=bool)
-EMAIL_HOST_USER = config('EMAIL_HOST_USER')
-EMAIL_HOST_PASSWORD = config('EMAIL_HOST_PASSWORD')
+EMAIL_HOST = os.getenv('EMAIL_HOST')
+EMAIL_PORT = os.getenv('EMAIL_PORT')
+EMAIL_USE_TLS = True
+
+# Django espera ESTOS nombres exactos de variable:
+EMAIL_HOST_USER = os.getenv('BREVO_SMTP_USER')
+EMAIL_HOST_PASSWORD = os.getenv('BREVO_SMTP_PASSWORD') # <--- Cambiado aquí
+
+# El remitente que verán tus usuarios
+DEFAULT_FROM_EMAIL = os.getenv('MI_CORREO_VERIFICADO') # <--- Mejor usar un correo real
