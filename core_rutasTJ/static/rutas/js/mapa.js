@@ -1,4 +1,4 @@
-//* ================= CONFIGURACIÓN MAPA ================= */
+/* ================= CONFIGURACIÓN MAPA ================= */
 
 const southWest = L.latLng(32.45, -117.15);
 const northEast = L.latLng(32.60, -116.85);
@@ -51,31 +51,18 @@ function getCookie(name) {
 const csrftoken = getCookie('csrftoken');
 
 /* ================= ICONOS PERSONALIZADOS ================= */
+// Ahora usamos clases CSS definidas en styles.css
 const iconoVerde = L.divIcon({
-    className: '',
-    html: `<div style="
-        width: 24px; height: 24px;
-        background: #22c55e;
-        border: 3px solid #fff;
-        border-radius: 50% 50% 50% 0;
-        transform: rotate(-45deg);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    "></div>`,
+    className: 'custom-div-icon',
+    html: `<div class="marker-pin marker-pin-green"></div>`,
     iconSize: [24, 24],
     iconAnchor: [12, 24],
     popupAnchor: [0, -24]
 });
 
 const iconoRojo = L.divIcon({
-    className: '',
-    html: `<div style="
-        width: 24px; height: 24px;
-        background: #ef4444;
-        border: 3px solid #fff;
-        border-radius: 50% 50% 50% 0;
-        transform: rotate(-45deg);
-        box-shadow: 0 2px 6px rgba(0,0,0,0.4);
-    "></div>`,
+    className: 'custom-div-icon',
+    html: `<div class="marker-pin marker-pin-red"></div>`,
     iconSize: [24, 24],
     iconAnchor: [12, 24],
     popupAnchor: [0, -24]
@@ -111,7 +98,6 @@ function limpiarMapa() {
     if (lineaConexionA) { map.removeLayer(lineaConexionA); lineaConexionA = null; }
     if (lineaConexionB) { map.removeLayer(lineaConexionB); lineaConexionB = null; }
 
-    // Limpiar panel de itinerario
     const panel = document.getElementById('itinerario');
     if (panel) panel.innerHTML = '';
 }
@@ -152,7 +138,7 @@ function calcularRutaOptima() {
         }
         dibujarRutaOptima(data.ruta_optima);
         dibujarRadiosYConexiones(data);
-        mostrarItinerario(data);  // ← muestra nombres de rutas y transbordos
+        mostrarItinerario(data);
     })
     .catch(err => {
         console.error("Error:", err);
@@ -220,7 +206,7 @@ function dibujarRadiosYConexiones(data) {
     ], { color: 'red', dashArray: '5,5', weight: 4 }).addTo(map);
 }
 
-/* ================= ITINERARIO CON NOMBRES DE RUTAS ================= */
+/* ================= ITINERARIO CON CLASES CSS ================= */
 function mostrarItinerario(data) {
     const panel = document.getElementById('itinerario');
     if (!panel) return;
@@ -228,27 +214,20 @@ function mostrarItinerario(data) {
     const transbordos = data.ruta_optima.filter(p => p.tipo === 'transbordo');
 
     let html = `
-        <div style="
-            background: #f8fafc;
-            border: 1px solid #e2e8f0;
-            border-radius: 8px;
-            padding: 16px;
-            margin-top: 16px;
-            font-family: sans-serif;
-        ">
-            <h3 style="margin: 0 0 12px 0; color: #1e293b;">
-                🗺️ Itinerario
-                <span style="font-size: 13px; font-weight: normal; color: #64748b;">
+        <div class="itinerary-container">
+            <h3 class="itinerary-header">
+                <span>🗺️ Itinerario</span>
+                <span class="itinerary-meta">
                     — ${data.total_paradas} paradas · ${transbordos.length} transbordo(s)
                 </span>
             </h3>
-            <div style="display: flex; flex-direction: column; gap: 8px;">
+            <div class="itinerary-steps">
     `;
 
     // Origen
     html += `
-        <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:18px;">🟢</span>
+        <div class="itinerary-point">
+            <span>🟢</span>
             <span><strong>Origen:</strong> ${data.origen.nombre}</span>
         </div>
     `;
@@ -256,19 +235,11 @@ function mostrarItinerario(data) {
     // Rutas y transbordos
     transbordos.forEach((t, i) => {
         html += `
-            <div style="
-                display: flex;
-                align-items: center;
-                gap: 8px;
-                background: #fef9c3;
-                border-left: 4px solid #eab308;
-                padding: 8px 12px;
-                border-radius: 4px;
-            ">
-                <span style="font-size:16px;">🚌</span>
+            <div class="itinerary-transfer">
+                <span>🚌</span>
                 <span>
                     ${i === 0 ? '<strong>Tomar ruta:</strong>' : '<strong>Transbordo → tomar ruta:</strong>'}
-                    <strong style="color:#92400e;"> ${t.ruta}</strong>
+                    <strong class="route-highlight"> ${t.ruta}</strong>
                 </span>
             </div>
         `;
@@ -276,8 +247,8 @@ function mostrarItinerario(data) {
 
     // Destino
     html += `
-        <div style="display:flex; align-items:center; gap:8px;">
-            <span style="font-size:18px;">🔴</span>
+        <div class="itinerary-point">
+            <span>🔴</span>
             <span><strong>Destino:</strong> ${data.destino.nombre}</span>
         </div>
     `;
@@ -330,7 +301,7 @@ function llenarTabla(rutas) {
 
         const btn = document.createElement('button');
         btn.textContent   = '👁️ Ver en Mapa';
-        btn.style.cssText = 'background-color:#e1f5fe; cursor:pointer;';
+        btn.classList.add('btn-view-map'); // Usamos clase en lugar de cssText
         btn.addEventListener('click', () => mostrarRuta(ruta.coordenadas));
 
         tdAccion.appendChild(btn);

@@ -1,0 +1,41 @@
+/* ================= BOTONES DE ACCIÓN EN TABLA ================= */
+.btn-action {
+    padding: 6px 12px;
+    border-radius: 4px;
+    border: 1px solid transparent;
+    cursor: pointer;
+    font-size: 14px;
+    transition: all 0.2s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+}
+
+/* Botón Ver */
+.btn-view {
+    background-color: #e1f5fe;
+    color: #01579b;
+    border-color: #b3e5fc;
+}
+
+.btn-view:hover {
+    background-color: #b3e5fc;
+}
+
+/* Botón Eliminar */
+.btn-delete {
+    background-color: #ffebee;
+    color: #c62828;
+    border-color: #ffcdd2;
+    margin-left: 8px;
+}
+
+.btn-delete:hover {
+    background-color: #ffcdd2;
+}
+
+/* ================= AJUSTES DE TABLA ================= */
+#tablaRutas td {
+    padding: 12px 8px;
+    vertical-align: middle;
+}

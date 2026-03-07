@@ -1,11 +1,9 @@
 /* ================= CONFIGURACIÓN MAPA ================= */
 
-// 1️⃣ Definir límites de la ciudad (aproximados)
 const southWest = L.latLng(32.45, -117.15);
 const northEast = L.latLng(32.60, -116.85);
 const bounds = L.latLngBounds(southWest, northEast);
 
-// 2️⃣ Crear mapa con restricciones
 const map = L.map('map', {
     center: [32.5255, -117.0335],
     zoom: 13,
@@ -15,13 +13,11 @@ const map = L.map('map', {
     maxBoundsViscosity: 1.0
 });
 
-// 3️⃣ Agregar capa
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: 12,
     maxZoom: 18
 }).addTo(map);
 
-// 4️⃣ Ajustar vista exactamente al área
 map.fitBounds(bounds);
 
 /* ================= VARIABLES GLOBALES ================= */
@@ -29,7 +25,6 @@ let puntos = [];
 let markers = [];
 let rutaActual = null;
 
-// Rutas configuradas manualmente (Ajusta según tu urls.py si es necesario)
 const ENDPOINTS = {
     guardar: '/panel/guardar-ruta/',
     obtener: '/panel/obtener-rutas/',
@@ -69,50 +64,48 @@ function limpiarMapa() {
 }
 
 /* ================= GUARDAR RUTA ================= */
-document.getElementById("btn-terminar").onclick = function () {
-    const nombre = document.getElementById("nombreRuta").value.trim();
+const btnTerminar = document.getElementById("btn-terminar");
+if (btnTerminar) {
+    btnTerminar.onclick = function () {
+        const nombreInput = document.getElementById("nombreRuta");
+        const nombre = nombreInput.value.trim();
 
-    if (!nombre || puntos.length < 2) {
-        alert("Escribe un nombre y marca al menos 2 puntos en el mapa");
-        return;
-    }
-
-    fetch(ENDPOINTS.guardar, {
-        method: 'POST',
-        headers: { 
-            'Content-Type': 'application/json',
-            'X-CSRFToken': csrftoken 
-        },
-        body: JSON.stringify({
-            nombre: nombre,
-            coordenadas: puntos 
-        })
-    })
-    .then(res => {
-        if (!res.ok) throw new Error('Error en la respuesta del servidor');
-        return res.json();
-    })
-    .then(data => {
-        if(data.error) {
-            alert("Error: " + data.error);
-        } else {
-            alert("Ruta guardada correctamente");
-            document.getElementById("nombreRuta").value = "";
-            limpiarMapa();
-            cargarRutas();
-            cargarTablaRutas();
+        if (!nombre || puntos.length < 2) {
+            alert("Escribe un nombre y marca al menos 2 puntos en el mapa");
+            return;
         }
-    })
-    .catch(err => console.error("Error al guardar:", err));
-};
+
+        fetch(ENDPOINTS.guardar, {
+            method: 'POST',
+            headers: { 
+                'Content-Type': 'application/json',
+                'X-CSRFToken': csrftoken 
+            },
+            body: JSON.stringify({
+                nombre: nombre,
+                coordenadas: puntos 
+            })
+        })
+        .then(res => res.json())
+        .then(data => {
+            if(data.error) {
+                alert("Error: " + data.error);
+            } else {
+                alert("Ruta guardada correctamente");
+                nombreInput.value = "";
+                limpiarMapa();
+                cargarRutas();
+                cargarTablaRutas();
+            }
+        })
+        .catch(err => console.error("Error al guardar:", err));
+    };
+}
 
 /* ================= CARGAR Y MOSTRAR ================= */
 function cargarRutas() {
     fetch(ENDPOINTS.obtener)
-        .then(res => {
-            if (!res.ok) throw new Error('No se pudieron obtener las rutas');
-            return res.json();
-        })
+        .then(res => res.json())
         .then(rutas => {
             const select = document.getElementById('rutaSelect');
             if(!select) return;
@@ -142,22 +135,10 @@ function mostrarRuta(coordenadas) {
     map.fitBounds(rutaActual.getBounds());
 }
 
-const selectElement = document.getElementById('rutaSelect');
-if(selectElement) {
-    selectElement.addEventListener('change', function () {
-        const option = this.options[this.selectedIndex];
-        if (!option.value || !option.dataset.coordenadas) return;
-        mostrarRuta(JSON.parse(option.dataset.coordenadas));
-    });
-}
-
 /* ================= TABLA Y ELIMINACIÓN ================= */
 function cargarTablaRutas() {
     fetch(ENDPOINTS.obtener)
-        .then(res => {
-            if (!res.ok) throw new Error('Error al obtener rutas');
-            return res.json();
-        })
+        .then(res => res.json())
         .then(rutas => {
             const tbody = document.getElementById('tablaRutas');
             if(!tbody) return;
@@ -166,22 +147,27 @@ function cargarTablaRutas() {
             rutas.forEach(ruta => {
                 const tr = document.createElement('tr');
                 
-                // Convertimos las coordenadas a string para pasarlas al botón
-                const coordsStr = JSON.stringify(ruta.coordenadas);
-
+                // Usamos clases CSS en lugar de style inline
                 tr.innerHTML = `
                     <td>${ruta.id}</td>
                     <td>${ruta.nombre}</td>
                     <td>
-                        <button onclick='mostrarRuta(${coordsStr})' style="background-color: #e1f5fe; cursor: pointer;">
+                        <button class="btn-action btn-view" data-id="${ruta.id}">
                             👁️ Ver en Mapa
                         </button>
-                        
-                        <button onclick="eliminarRuta(${ruta.id})" style="background-color: #ffebee; cursor: pointer; margin-left: 5px;">
+                        <button class="btn-action btn-delete" data-id="${ruta.id}">
                             🗑️ Eliminar
                         </button>
                     </td>
                 `;
+
+                // Asignamos los eventos de forma limpia
+                const btnView = tr.querySelector('.btn-view');
+                btnView.onclick = () => mostrarRuta(ruta.coordenadas);
+
+                const btnDel = tr.querySelector('.btn-delete');
+                btnDel.onclick = () => eliminarRuta(ruta.id);
+
                 tbody.appendChild(tr);
             });
         })
@@ -207,3 +193,13 @@ function eliminarRuta(rutaId) {
 // Carga Inicial
 cargarRutas();
 cargarTablaRutas();
+
+// Listener del Select
+const selectElement = document.getElementById('rutaSelect');
+if(selectElement) {
+    selectElement.addEventListener('change', function () {
+        const option = this.options[this.selectedIndex];
+        if (!option.value || !option.dataset.coordenadas) return;
+        mostrarRuta(JSON.parse(option.dataset.coordenadas));
+    });
+}
