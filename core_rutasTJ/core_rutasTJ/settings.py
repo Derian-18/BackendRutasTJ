@@ -36,6 +36,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 INSTALLED_APPS = [
     'django.contrib.admin',
+    'axes', # Agrega django-axes a las aplicaciones instaladas
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -46,12 +47,20 @@ INSTALLED_APPS = [
     'apps.rutas',
 ]
 
+AUTHENTICATION_BACKENDS = [
+    # Axes backend debe ir primero
+    'axes.backends.AxesStandaloneBackend',
+    # Backend por defecto de Django
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'axes.middleware.AxesMiddleware', # axes
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
@@ -149,3 +158,15 @@ EMAIL_HOST_PASSWORD = os.getenv('BREVO_SMTP_PASSWORD') # <--- Cambiado aquí
 
 # El remitente que verán tus usuarios
 DEFAULT_FROM_EMAIL = os.getenv('MI_CORREO_VERIFICADO') # <--- Mejor usar un correo real
+
+# DJANGO-AXES CONFIGURACIÓN
+# Bloquea basándose en la IP, sin importar qué usuario pongan
+AXES_ONLY_USER_FAILURES = False
+AXES_FAILURE_LIMIT = 3# Bloquea después de 5 intentos
+AXES_COOLOFF_TIME = 1# El bloqueo dura 1 hora (en horas)
+AXES_LOCKOUT_TEMPLATE = 'panel/bloqueado.html'
+
+# Para cuando tenga HTTPS (Cambiar a True despues)
+SECURE_SSL_REDIRECT = False
+SESSION_COOKIE_SECURE = False
+CSRF_COOKIE_SECURE = False
