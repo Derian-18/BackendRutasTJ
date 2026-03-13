@@ -162,8 +162,9 @@ DEFAULT_FROM_EMAIL = os.getenv('MI_CORREO_VERIFICADO') # <--- Mejor usar un corr
 # DJANGO-AXES CONFIGURACIÓN
 # Bloquea basándose en la IP, sin importar qué usuario pongan
 AXES_ONLY_USER_FAILURES = False
-AXES_FAILURE_LIMIT = 3# Bloquea después de 5 intentos
-AXES_COOLOFF_TIME = 1# El bloqueo dura 1 hora (en horas)
+AXES_LOCKOUT_PARAMETERS = ['ip_address']  # ← rastrear SOLO por IP
+AXES_FAILURE_LIMIT = 3
+AXES_COOLOFF_TIME = 1
 AXES_LOCKOUT_TEMPLATE = 'panel/bloqueado.html'
 
 # Para cuando tenga HTTPS (Cambiar a True despues)

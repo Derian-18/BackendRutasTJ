@@ -10,6 +10,7 @@ from apps.principal.models import Ruta, Parada, Conexion
 from django.db import transaction
 from axes.models import AccessAttempt
 from django.conf import settings
+from django.db.models import Sum
 
 
 # ==================== DISTANCIA ====================
@@ -59,24 +60,24 @@ def buscar_parada_existente_cercana(lat, lon, radio=RADIO_TRANSBORDO):
 
 # ==================== AUTENTICACIÓN ====================
 def login_view(request):
-    # Si ya está logueado, al panel
     if request.user.is_authenticated:
         return redirect('administrador')
 
-    # Obtenemos la IP del usuario
     ip = request.META.get('REMOTE_ADDR')
-    # Obtenemos el límite de intentos (por defecto es 5 si no lo definiste)
-    limit = getattr(settings, 'AXES_FAILURE_LIMIT', 5)
+    limit = getattr(settings, 'AXES_FAILURE_LIMIT', 3)
 
-    # Verificamos si esta IP ya está bloqueada en la base de datos
-    if AccessAttempt.objects.filter(ip_address=ip, failures_since_start__gte=limit).exists():
+    # Sumamos todos los fallos de esa IP en todos sus registros
+    total_fallos = AccessAttempt.objects.filter(
+        ip_address=ip
+    ).aggregate(total=Sum('failures_since_start'))['total'] or 0
+
+    if total_fallos >= limit:
         return render(request, 'panel/bloqueado.html')
 
     if request.method == "POST":
         username = request.POST.get("username")
         password = request.POST.get("password")
 
-        # authenticate() se encarga de registrar el intento (éxito o fallo)
         user = authenticate(request, username=username, password=password)
 
         if user is not None:
