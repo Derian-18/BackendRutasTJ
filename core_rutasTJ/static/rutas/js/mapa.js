@@ -211,14 +211,24 @@ function mostrarItinerario(data) {
     const panel = document.getElementById('itinerario');
     if (!panel) return;
 
-    const transbordos = data.ruta_optima.filter(p => p.tipo === 'transbordo');
+    const transbordosRuta = data.ruta_optima.filter(p => p.tipo === 'transbordo');
+    const totalTransbordos = Number.isInteger(data.total_transbordos)
+        ? data.total_transbordos
+        : Math.max(0, transbordosRuta.length - 1);
+    const requiereTransbordo = typeof data.requiere_transbordo === 'boolean'
+        ? data.requiere_transbordo
+        : totalTransbordos > 0;
+
+    const estadoRuta = requiereTransbordo
+        ? `🔁 Necesita ${totalTransbordos} transbordo(s)`
+        : '✅ Ruta directa';
 
     let html = `
         <div class="itinerary-container">
             <h3 class="itinerary-header">
                 <span>🗺️ Itinerario</span>
                 <span class="itinerary-meta">
-                    — ${data.total_paradas} paradas · ${transbordos.length} transbordo(s)
+                    — ${data.total_paradas} paradas · ${estadoRuta}
                 </span>
             </h3>
             <div class="itinerary-steps">
@@ -233,7 +243,7 @@ function mostrarItinerario(data) {
     `;
 
     // Rutas y transbordos
-    transbordos.forEach((t, i) => {
+    transbordosRuta.forEach((t, i) => {
         html += `
             <div class="itinerary-transfer">
                 <span>🚌</span>
