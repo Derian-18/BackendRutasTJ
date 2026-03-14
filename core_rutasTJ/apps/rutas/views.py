@@ -79,40 +79,43 @@ def construir_grafo():
 
 # ==================== DIJKSTRA ====================
 
-def dijkstra_con_transbordos(origen_id, destino_id, penalizacion_transbordo=500):
+def dijkstra_con_transbordos(origen_id, destino_id):
 
     if origen_id == destino_id:
         return [(origen_id, None)]
 
     grafo = construir_grafo()
 
-    cola = [(0, origen_id, None)]
+    # Costo lexicográfico: primero minimizar transbordos, luego distancia.
+    # Evita depender de una penalización fija que puede producir resultados
+    # poco intuitivos cuando la red tiene tramos largos/cortos muy dispares.
+    cola = [(0, 0, origen_id, None)]
     distancias = {}
     padres = {}
 
     while cola:
-        dist_actual, nodo_actual, ruta_actual = heapq.heappop(cola)
+        transbordos_actuales, dist_actual, nodo_actual, ruta_actual = heapq.heappop(cola)
         estado = (nodo_actual, ruta_actual)
 
         if estado in distancias:
             continue
 
-        distancias[estado] = dist_actual
+        distancias[estado] = (transbordos_actuales, dist_actual)
 
         if nodo_actual == destino_id:
             break
 
         for vecino, peso, ruta_id in grafo.get(nodo_actual, []):
-            penalizacion = 0
+            nuevos_transbordos = transbordos_actuales
             if ruta_actual is not None and ruta_actual != ruta_id:
-                penalizacion = penalizacion_transbordo
+                nuevos_transbordos += 1
 
-            nueva_dist = dist_actual + peso + penalizacion
+            nueva_dist = dist_actual + peso
             nuevo_estado = (vecino, ruta_id)
 
             if nuevo_estado not in distancias:
                 padres[nuevo_estado] = estado
-                heapq.heappush(cola, (nueva_dist, vecino, ruta_id))
+                heapq.heappush(cola, (nuevos_transbordos, nueva_dist, vecino, ruta_id))
 
     estados_finales = [e for e in distancias if e[0] == destino_id]
 
@@ -203,9 +206,11 @@ def calcular_ruta(request):
 
         resultado   = []
         ruta_actual = None
+        rutas_usadas = []
 
         for nodo_id, ruta_id in camino:
             if ruta_id is not None and ruta_id != ruta_actual:
+                rutas_usadas.append(ruta_id)
                 resultado.append({
                     "tipo": "transbordo",
                     "ruta": rutas_dict[ruta_id].nombre
@@ -224,6 +229,8 @@ def calcular_ruta(request):
                 "longitud": parada.longitud
             })
 
+        total_transbordos = max(0, len(rutas_usadas) - 1)
+
         return JsonResponse({
             "origen": {
                 "nombre":   parada_inicio.nombre,
@@ -235,6 +242,8 @@ def calcular_ruta(request):
                 "latitud":  parada_fin.latitud,
                 "longitud": parada_fin.longitud
             },
+            "requiere_transbordo": total_transbordos > 0,
+            "total_transbordos": total_transbordos,
             "total_paradas": len(paradas_ids),
             "ruta_optima":   resultado
         })
