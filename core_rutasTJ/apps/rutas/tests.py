@@ -49,11 +49,13 @@ class CalcularRutaViewTests(TestCase):
         response = self.client.post(
             reverse("calcular_ruta"),
             data=json.dumps({
+            data={
                 "latA": p1.latitud,
                 "lonA": p1.longitud,
                 "latB": p3.latitud,
                 "lonB": p3.longitud,
             }),
+            },
             content_type="application/json",
         )
 
