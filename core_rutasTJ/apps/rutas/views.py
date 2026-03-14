@@ -59,6 +59,30 @@ def buscar_parada_con_expansion(lat, lon):
     return None
 
 
+def buscar_paradas_cercanas_con_expansion(lat, lon, limite=6):
+    radios = [500, 800, 1200, 2000]
+    paradas_por_id = {}
+
+    for radio in radios:
+        delta = radio / 111000
+        candidatas = Parada.objects.filter(
+            latitud__gte=lat - delta,
+            latitud__lte=lat + delta,
+            longitud__gte=lon - delta,
+            longitud__lte=lon + delta,
+        )
+
+        for parada in candidatas:
+            d = distancia_metros(lat, lon, parada.latitud, parada.longitud)
+            if d <= radio:
+                distancia_actual = paradas_por_id.get(parada.id, (None, float("inf")))[1]
+                if d < distancia_actual:
+                    paradas_por_id[parada.id] = (parada, d)
+
+    paradas_ordenadas = sorted(paradas_por_id.values(), key=lambda item: item[1])
+    return paradas_ordenadas[:limite]
+
+
 # ==================== GRAFO ====================
 
 def construir_grafo():
@@ -79,40 +103,43 @@ def construir_grafo():
 
 # ==================== DIJKSTRA ====================
 
-def dijkstra_con_transbordos(origen_id, destino_id, penalizacion_transbordo=500):
+def dijkstra_con_transbordos(origen_id, destino_id):
 
     if origen_id == destino_id:
         return [(origen_id, None)]
 
     grafo = construir_grafo()
 
-    cola = [(0, origen_id, None)]
+    # Costo lexicográfico: primero minimizar transbordos, luego distancia.
+    # Evita depender de una penalización fija que puede producir resultados
+    # poco intuitivos cuando la red tiene tramos largos/cortos muy dispares.
+    cola = [(0, 0, origen_id, None)]
     distancias = {}
     padres = {}
 
     while cola:
-        dist_actual, nodo_actual, ruta_actual = heapq.heappop(cola)
+        transbordos_actuales, dist_actual, nodo_actual, ruta_actual = heapq.heappop(cola)
         estado = (nodo_actual, ruta_actual)
 
         if estado in distancias:
             continue
 
-        distancias[estado] = dist_actual
+        distancias[estado] = (transbordos_actuales, dist_actual)
 
         if nodo_actual == destino_id:
             break
 
         for vecino, peso, ruta_id in grafo.get(nodo_actual, []):
-            penalizacion = 0
+            nuevos_transbordos = transbordos_actuales
             if ruta_actual is not None and ruta_actual != ruta_id:
-                penalizacion = penalizacion_transbordo
+                nuevos_transbordos += 1
 
-            nueva_dist = dist_actual + peso + penalizacion
+            nueva_dist = dist_actual + peso
             nuevo_estado = (vecino, ruta_id)
 
             if nuevo_estado not in distancias:
                 padres[nuevo_estado] = estado
-                heapq.heappush(cola, (nueva_dist, vecino, ruta_id))
+                heapq.heappush(cola, (nuevos_transbordos, nueva_dist, vecino, ruta_id))
 
     estados_finales = [e for e in distancias if e[0] == destino_id]
 
@@ -134,6 +161,23 @@ def dijkstra_con_transbordos(origen_id, destino_id, penalizacion_transbordo=500)
     camino.reverse()
 
     return camino
+
+
+def contar_transbordos_camino(camino):
+    ruta_anterior = None
+    transbordos = 0
+
+    for _, ruta_id in camino:
+        if ruta_id is None:
+            continue
+        if ruta_anterior is None:
+            ruta_anterior = ruta_id
+            continue
+        if ruta_id != ruta_anterior:
+            transbordos += 1
+            ruta_anterior = ruta_id
+
+    return transbordos
 
 
 # ==================== VISTA PRINCIPAL ====================
@@ -169,30 +213,56 @@ def calcular_ruta(request):
     # su propia página HTML de error, que el JS no puede parsear como JSON
     # y lo reporta como 404 o error genérico al azar.
     try:
-        parada_inicio = buscar_parada_con_expansion(latA, lonA)
-        parada_fin    = buscar_parada_con_expansion(latB, lonB)
+        paradas_inicio_candidatas = buscar_paradas_cercanas_con_expansion(latA, lonA)
+        paradas_fin_candidatas = buscar_paradas_cercanas_con_expansion(latB, lonB)
 
         # FIX: Usar 422 en vez de 404 para errores de lógica de negocio.
         # 404 significa "URL no encontrada" — confunde al JS y al developer.
         # 422 significa "datos válidos pero no se pudo procesar" — semánticamente correcto.
-        if not parada_inicio:
+        if not paradas_inicio_candidatas:
             return JsonResponse(
                 {"error": "No hay paradas dentro de 2km del origen. Haz clic más cerca de una ruta."},
                 status=422
             )
-        if not parada_fin:
+        if not paradas_fin_candidatas:
             return JsonResponse(
                 {"error": "No hay paradas dentro de 2km del destino. Haz clic más cerca de una ruta."},
                 status=422
             )
 
-        camino = dijkstra_con_transbordos(parada_inicio.id, parada_fin.id)
+        mejor = None
+        mejor_camino = []
+        parada_inicio = None
+        parada_fin = None
 
-        if not camino:
+        for p_inicio, dist_inicio in paradas_inicio_candidatas:
+            for p_fin, dist_fin in paradas_fin_candidatas:
+                camino_actual = dijkstra_con_transbordos(p_inicio.id, p_fin.id)
+                if not camino_actual:
+                    continue
+
+                total_transbordos_camino = contar_transbordos_camino(camino_actual)
+                # Se prioriza: 1) menos transbordos, 2) menor caminata total,
+                # 3) menor número de saltos de paradas (desempate ligero).
+                score = (
+                    total_transbordos_camino,
+                    round(dist_inicio + dist_fin, 2),
+                    len(camino_actual),
+                )
+
+                if mejor is None or score < mejor:
+                    mejor = score
+                    mejor_camino = camino_actual
+                    parada_inicio = p_inicio
+                    parada_fin = p_fin
+
+        if not mejor_camino:
             return JsonResponse(
                 {"error": "No hay ruta disponible entre esos puntos."},
                 status=422
             )
+
+        camino = mejor_camino
 
         # Precargar en un solo query cada uno (evitar N+1)
         paradas_ids = [nodo for nodo, _ in camino]
@@ -203,9 +273,11 @@ def calcular_ruta(request):
 
         resultado   = []
         ruta_actual = None
+        rutas_usadas = []
 
         for nodo_id, ruta_id in camino:
             if ruta_id is not None and ruta_id != ruta_actual:
+                rutas_usadas.append(ruta_id)
                 resultado.append({
                     "tipo": "transbordo",
                     "ruta": rutas_dict[ruta_id].nombre
@@ -224,6 +296,8 @@ def calcular_ruta(request):
                 "longitud": parada.longitud
             })
 
+        total_transbordos = max(0, len(rutas_usadas) - 1)
+
         return JsonResponse({
             "origen": {
                 "nombre":   parada_inicio.nombre,
@@ -235,6 +309,8 @@ def calcular_ruta(request):
                 "latitud":  parada_fin.latitud,
                 "longitud": parada_fin.longitud
             },
+            "requiere_transbordo": total_transbordos > 0,
+            "total_transbordos": total_transbordos,
             "total_paradas": len(paradas_ids),
             "ruta_optima":   resultado
         })
