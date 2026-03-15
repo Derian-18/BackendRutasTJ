@@ -11,48 +11,15 @@ from django.template.loader import render_to_string
 def home(request):
     return render(request, 'principal/index.html')
 
-#def contacto(request):
-#    if request.method == 'POST':
-#        nombre = request.POST.get('nombre')
-#        correo = request.POST.get('correo')
-#        mensaje = request.POST.get('mensaje')
-#
-#        email_mensaje = f"""
-#Nuevo mensaje de contacto:
-#
-#Nombre: {nombre}
-#Correo: {correo}
-#
-#Mensaje:
-#{mensaje}
-#"""
-#
-#        try:
-#            send_mail(
-#                f'Contacto web - {nombre}',
-#                email_mensaje,
-#                settings.DEFAULT_FROM_EMAIL,
-#                [config('EMAIL_RECIPENT')],
-#                fail_silently=False,
-#                reply_to=[correo]  # 👈 importante
-#            )
-#
-#            messages.success(request, 'Mensaje enviado correctamente ✅')
-#
-#        except Exception as e:
-#            print(f'Error al enviar: {e}')
-#            messages.error(request, 'Error al enviar el mensaje ❌')
-#
-#        return redirect('contacto')
-#
-#    return render(request, 'principal/contacto.html')
-
-
 def contacto(request):
     if request.method == "POST":
+
+        if request.POST.get('hp_field'):
+            return redirect('contacto') # Aqui se ignora el envio silenciosamente
+
         nombre = request.POST.get('nombre')
         correo_usuario = request.POST.get('correo')
-        mensaje_texto = request.POST.get('mensaje')
+        mensaje_texto = request.POST.get('mensaje', '')[:3000] # Limitamos a solo 3000 cartacteres
 
         # Construimos el cuerpo del mensaje usando un f-string
         # Esto mantiene el orden y se ve limpio en tu bandeja de entrada
@@ -71,7 +38,7 @@ def contacto(request):
             subject=f"Consulta de {nombre} - Rutas TJ",
             body=cuerpo_mensaje,
             from_email=settings.DEFAULT_FROM_EMAIL,
-            to=['jimenezderian81@gmail.com'], 
+            to=['rutastj220@gmail.com'], 
             reply_to=[correo_usuario], # Esto sigue siendo lo más importante
         )
 

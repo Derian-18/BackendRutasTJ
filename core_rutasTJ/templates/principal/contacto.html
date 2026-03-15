@@ -35,12 +35,21 @@
     {% endif %}
 
     <main class="container">
+
+        
+
         <div class="contact-card">
             <h1>Contacto</h1>
             <p class="subtitle">¿Tienes alguna duda o sugerencia sobre las rutas de Tijuana?</p>
 
             <form action="" method="POST">
                 {% csrf_token %}
+
+                <!-- Campo invisible para bots (en caso de ataque) -->
+                <div style="position: absolute; left: -5000px;" aria-hidden="true">
+                    <input type="text" name="hp_field" id="hp_field" tabindex="-1" autocomplete="off">
+                </div>
+                
                 <div class="form-row">
                     <input type="text" name="nombre" placeholder="Tu nombre" required>
                     <input type="email" name="correo" placeholder="Tu correo electrónico" required>
