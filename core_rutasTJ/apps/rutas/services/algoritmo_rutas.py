@@ -1,5 +1,5 @@
 import heapq
-from grafo_rutas import construir_grafo
+from .grafo_rutas import construir_grafo
 
 
 # ==================== DIJKSTRA ====================

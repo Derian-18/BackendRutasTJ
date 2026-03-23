@@ -91,7 +91,7 @@ def login_view(request):
 def logout_view(request):
     auth_logout(request)
     messages.success(request, 'Sesión cerrada correctamente.')
-    return redirect('home')
+    return redirect('login')
 
 @login_required
 def administrador_view(request):

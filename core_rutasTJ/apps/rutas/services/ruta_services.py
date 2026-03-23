@@ -1,5 +1,6 @@
-from principal.models import Parada, Ruta
-from services import buscar_parada_con_expansion, dijkstra_con_transbordos
+from apps.principal.models import Parada, Ruta
+from .busqueda_paradas import buscar_parada_con_expansion
+from .algoritmo_rutas import dijkstra_con_transbordos
 
 def calcular_ruta_optima(latA, lonA, latB, lonB):
     parada_inicio = buscar_parada_con_expansion(latA, lonA)

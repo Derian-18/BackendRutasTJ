@@ -1,5 +1,5 @@
 from apps.principal.models import Parada
-from utils.geografia import distancia_metros
+from ..utils.geografia import distancia_metros
 
 # ==================== BÚSQUEDA DE PARADA CERCANA ====================
 

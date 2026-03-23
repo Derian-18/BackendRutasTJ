@@ -15,7 +15,8 @@ const map = L.map('map', {
 
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: 12,
-    maxZoom: 18
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors'
 }).addTo(map);
 
 map.fitBounds(bounds);
