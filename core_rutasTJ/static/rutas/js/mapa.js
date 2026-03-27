@@ -13,10 +13,12 @@ const map = L.map('map', {
     maxBoundsViscosity: 1.0
 });
 
+// DESPUÉS — agrega el header con referrerPolicy
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: 12,
     maxZoom: 18,
-    attribution: '&copy; OpenStreetMap contributors'
+    attribution: '&copy; OpenStreetMap contributors',
+    referrerPolicy: 'no-referrer-when-downgrade'
 }).addTo(map);
 
 map.fitBounds(bounds);
@@ -185,13 +187,13 @@ function dibujarRadiosYConexiones(data) {
     const paradaFin    = data.destino;
 
     circuloA = L.circle([latA, lonA], {
-        radius: 2000,
+        radius: 400, // Aqui cambiamos el radio, solo es el color, no es la distancia que envia el backend
         color: 'green',
         fillOpacity: 0.07
     }).addTo(map);
 
     circuloB = L.circle([latB, lonB], {
-        radius: 2000,
+        radius: 400, // Igual aqui. De momento el radio para buscar rutas es de 400, este es solo el css, el backend marcara otra medida (Modificar para que sea mas alta)
         color: 'red',
         fillOpacity: 0.07
     }).addTo(map);
