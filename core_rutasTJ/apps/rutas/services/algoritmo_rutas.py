@@ -10,12 +10,15 @@ def dijkstra_con_transbordos(origen_id, destino_id, penalizacion_transbordo=500)
 
     grafo = construir_grafo()
 
-    cola = [(0, origen_id, None)]
+    # La tupla incluye un contador como desempate para evitar comparar
+    # ruta_id cuando la distancia es igual (None no es comparable con int)
+    contador = 0
+    cola = [(0, contador, origen_id, None)]
     distancias = {}
     padres = {}
 
     while cola:
-        dist_actual, nodo_actual, ruta_actual = heapq.heappop(cola)
+        dist_actual, _, nodo_actual, ruta_actual = heapq.heappop(cola)
         estado = (nodo_actual, ruta_actual)
 
         if estado in distancias:
@@ -23,20 +26,18 @@ def dijkstra_con_transbordos(origen_id, destino_id, penalizacion_transbordo=500)
 
         distancias[estado] = dist_actual
 
-        if nodo_actual == destino_id:
-            break
-
         for vecino, peso, ruta_id in grafo.get(nodo_actual, []):
             penalizacion = 0
-            if ruta_actual is not None and ruta_actual != ruta_id:
+            if ruta_actual is not None and ruta_id is not None and ruta_actual != ruta_id:
                 penalizacion = penalizacion_transbordo
 
             nueva_dist = dist_actual + peso + penalizacion
             nuevo_estado = (vecino, ruta_id)
 
             if nuevo_estado not in distancias:
+                contador += 1
                 padres[nuevo_estado] = estado
-                heapq.heappush(cola, (nueva_dist, vecino, ruta_id))
+                heapq.heappush(cola, (nueva_dist, contador, vecino, ruta_id))
 
     estados_finales = [e for e in distancias if e[0] == destino_id]
 

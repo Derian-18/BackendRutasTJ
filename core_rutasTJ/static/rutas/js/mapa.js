@@ -95,7 +95,10 @@ function limpiarMapa() {
     markers = [];
     puntos  = [];
 
-    if (rutaActual)     { map.removeLayer(rutaActual);     rutaActual     = null; }
+    capasRuta.forEach(capa => map.removeLayer(capa));
+    capasRuta  = [];
+    rutaActual = null;
+
     if (circuloA)       { map.removeLayer(circuloA);       circuloA       = null; }
     if (circuloB)       { map.removeLayer(circuloB);       circuloB       = null; }
     if (lineaConexionA) { map.removeLayer(lineaConexionA); lineaConexionA = null; }
@@ -156,21 +159,55 @@ function calcularRutaOptima() {
 }
 
 /* ================= DIBUJAR RUTA ================= */
+// Capas de la ruta (puede ser más de una polyline)
+let capasRuta = [];
+
 function dibujarRutaOptima(ruta) {
+    // Limpiar capas anteriores
+    capasRuta.forEach(capa => map.removeLayer(capa));
+    capasRuta = [];
     if (rutaActual) { map.removeLayer(rutaActual); rutaActual = null; }
 
-    const coordenadas = ruta
-        .filter(paso => paso.tipo === "parada")
-        .map(paso => [paso.latitud, paso.longitud]);
+    const paradas = ruta.filter(paso => paso.tipo === "parada");
+    if (paradas.length === 0) return;
 
-    if (coordenadas.length === 0) return;
+    // Dividir en segmentos: cada vez que cambia virtual/no-virtual
+    // dibujamos una polyline distinta con su color
+    let segmento = [paradas[0]];
 
-    rutaActual = L.polyline(coordenadas, {
-        color: 'blue',
-        weight: 6
+    for (let i = 1; i < paradas.length; i++) {
+        const actual = paradas[i];
+        const anterior = paradas[i - 1];
+
+        // Si el tipo de tramo cambia, cerramos el segmento y abrimos uno nuevo
+        if (actual.virtual !== anterior.virtual) {
+            dibujarSegmento(segmento, anterior.virtual);
+            segmento = [anterior]; // el punto de unión pertenece a ambos segmentos
+        }
+        segmento.push(actual);
+    }
+
+    // Dibujar el último segmento
+    if (segmento.length >= 1) {
+        dibujarSegmento(segmento, segmento[segmento.length - 1].virtual);
+    }
+
+    // Ajustar zoom al conjunto de todas las capas
+    const todasCoords = paradas.map(p => [p.latitud, p.longitud]);
+    const bounds = L.latLngBounds(todasCoords);
+    map.fitBounds(bounds);
+}
+
+function dibujarSegmento(paradas, esVirtual) {
+    if (paradas.length < 2) return;
+    const coords = paradas.map(p => [p.latitud, p.longitud]);
+    const capa = L.polyline(coords, {
+        color: esVirtual ? 'orange' : 'blue',
+        weight: 6,
+        dashArray: esVirtual ? '8,6' : null  // punteado para tramos a pie
     }).addTo(map);
-
-    map.fitBounds(rutaActual.getBounds());
+    capasRuta.push(capa);
+    rutaActual = capa; // mantener referencia a la última capa para compatibilidad
 }
 
 /* ================= DIBUJAR RADIOS Y CONEXIONES ================= */
@@ -187,13 +224,13 @@ function dibujarRadiosYConexiones(data) {
     const paradaFin    = data.destino;
 
     circuloA = L.circle([latA, lonA], {
-        radius: 400, // Aqui cambiamos el radio, solo es el color, no es la distancia que envia el backend
+        radius: 500, // Aqui cambiamos el radio, solo es el color, no es la distancia que envia el backend
         color: 'green',
         fillOpacity: 0.07
     }).addTo(map);
 
     circuloB = L.circle([latB, lonB], {
-        radius: 400, // Igual aqui. De momento el radio para buscar rutas es de 400, este es solo el css, el backend marcara otra medida (Modificar para que sea mas alta)
+        radius: 500, // Igual aqui. De momento el radio para buscar rutas es de 400, este es solo el css, el backend marcara otra medida (Modificar para que sea mas alta)
         color: 'red',
         fillOpacity: 0.07
     }).addTo(map);
@@ -316,10 +353,14 @@ function llenarTabla(rutas) {
 }
 
 function mostrarRuta(coordenadas) {
-    if (rutaActual) { map.removeLayer(rutaActual); rutaActual = null; }
+    capasRuta.forEach(capa => map.removeLayer(capa));
+    capasRuta = [];
+    rutaActual = null;
+
     if (!coordenadas || coordenadas.length === 0) return;
 
     rutaActual = L.polyline(coordenadas, { color: 'blue', weight: 5 }).addTo(map);
+    capasRuta.push(rutaActual);
     map.fitBounds(rutaActual.getBounds());
 }
 
