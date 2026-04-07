@@ -1,16 +1,15 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Rutas TJ</title>
+    <title>Solicitar Acceso | Rutas TJ</title>
     <link rel="stylesheet" href="{% static 'panel/css/login.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-
 <body>
+
     <div id="toast-container" class="toast-container">
         {% if messages %}
             {% for message in messages %}
@@ -38,30 +37,24 @@
             <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
             <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i> Mapa</a>
             <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i> Contacto</a>
-            <a href="#" class="btn-admin"><strong>Iniciar sesión</strong></a>
+            <a href="{% url 'login' %}" class="btn-admin"><strong>Iniciar sesión</strong></a>
         </nav>
     </header>
 
     <main>
-        <h2>Iniciar sesión</h2>
+        <h2>Crear cuenta administrador</h2>
+        <p style="text-align:center; color:#666; margin-bottom:1.5rem; font-size:0.95rem;">
+            Se enviará un código de verificación al correo de la empresa.
+        </p>
 
         <form method="POST">
             {% csrf_token %}
-            <label for="user">Usuario:</label>
-            <input type="text" id="user" name="username" placeholder="Tu usuario" required>
-
-            <label for="pass">Contraseña:</label>
-            <input type="password" id="pass" name="password" placeholder="••••••••" required>
-
-            <button type="submit">Entrar</button>
+            <button type="submit">Enviar código</button>
         </form>
 
-        <!-- Link para crear cuenta administrador -->
-        <p style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: #666;">
-            ¿Necesitas crear una cuenta de administrador?
-            <a href="{% url 'solicitar_codigo' %}" style="color: inherit; font-weight: 600;">
-                Solicitar acceso
-            </a>
+        <p style="margin-top:1.5rem; text-align:center; font-size:0.9rem; color:#666;">
+            ¿Ya tienes cuenta?
+            <a href="{% url 'login' %}" style="color:inherit; font-weight:600;">Iniciar sesión</a>
         </p>
     </main>
 

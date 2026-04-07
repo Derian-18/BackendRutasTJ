@@ -153,7 +153,7 @@ button:hover {
 
 /* Mensajes de error/Django */
 p {
-    background-color: #ffdde1;
+    background-color: #ffffff;
     color: #c0392b;
     padding: 10px;
     border-radius: 5px;
