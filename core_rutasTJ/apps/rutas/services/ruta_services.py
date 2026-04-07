@@ -29,15 +29,22 @@ def construir_respuesta(camino, parada_inicio, parada_fin):
 
     resultado = []
     ruta_actual = None
+    tramo_virtual = False  # indica si el tramo actual es a pie (arista virtual)
 
     for nodo_id, ruta_id in camino:
 
-        if ruta_id is not None and ruta_id != ruta_actual:
-            resultado.append({
-                "tipo": "transbordo",
-                "ruta": rutas_dict[ruta_id].nombre
-            })
-            ruta_actual = ruta_id
+        if ruta_id is None:
+            # Arista virtual: tramo a pie entre rutas
+            tramo_virtual = True
+        else:
+            # Arista real: resetear tramo_virtual
+            tramo_virtual = False
+            if ruta_id != ruta_actual:
+                resultado.append({
+                    "tipo": "transbordo",
+                    "ruta": rutas_dict[ruta_id].nombre
+                })
+                ruta_actual = ruta_id
 
         parada = paradas_dict.get(nodo_id)
 
@@ -47,7 +54,8 @@ def construir_respuesta(camino, parada_inicio, parada_fin):
                 "id": parada.id,
                 "nombre": parada.nombre,
                 "latitud": parada.latitud,
-                "longitud": parada.longitud
+                "longitud": parada.longitud,
+                "virtual": tramo_virtual  # True = este tramo es a pie
             })
 
     return {
