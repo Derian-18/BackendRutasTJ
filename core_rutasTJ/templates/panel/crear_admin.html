@@ -1,16 +1,15 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login | Rutas TJ</title>
+    <title>Crear Cuenta | Rutas TJ</title>
     <link rel="stylesheet" href="{% static 'panel/css/login.css' %}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
-
 <body>
+
     <div id="toast-container" class="toast-container">
         {% if messages %}
             {% for message in messages %}
@@ -38,31 +37,43 @@
             <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
             <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i> Mapa</a>
             <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i> Contacto</a>
-            <a href="#" class="btn-admin"><strong>Iniciar sesión</strong></a>
+            <a href="{% url 'login' %}" class="btn-admin"><strong>Iniciar sesión</strong></a>
         </nav>
     </header>
 
     <main>
-        <h2>Iniciar sesión</h2>
+        <h2>Crear cuenta administrador</h2>
+        <p style="text-align:center; color:#666; margin-bottom:1.5rem; font-size:0.95rem;">
+            Código verificado. Elige un nombre de administrador y contraseña.
+        </p>
 
         <form method="POST">
             {% csrf_token %}
-            <label for="user">Usuario:</label>
-            <input type="text" id="user" name="username" placeholder="Tu usuario" required>
 
-            <label for="pass">Contraseña:</label>
-            <input type="password" id="pass" name="password" placeholder="••••••••" required>
+            <label for="id_username">{{ form.username.label }}:</label>
+            {{ form.username }}
+            {% if form.username.errors %}
+                <p style="color:red; font-size:0.85rem;">{{ form.username.errors.0 }}</p>
+            {% endif %}
 
-            <button type="submit">Entrar</button>
+            <label for="id_password1">{{ form.password1.label }}:</label>
+            {{ form.password1 }}
+            {% if form.password1.errors %}
+                <p style="color:red; font-size:0.85rem;">{{ form.password1.errors.0 }}</p>
+            {% endif %}
+
+            <label for="id_password2">{{ form.password2.label }}:</label>
+            {{ form.password2 }}
+            {% if form.password2.errors %}
+                <p style="color:red; font-size:0.85rem;">{{ form.password2.errors.0 }}</p>
+            {% endif %}
+
+            {% if form.non_field_errors %}
+                <p style="color:red; font-size:0.85rem;">{{ form.non_field_errors.0 }}</p>
+            {% endif %}
+
+            <button type="submit">Crear cuenta</button>
         </form>
-
-        <!-- Link para crear cuenta administrador -->
-        <p style="margin-top: 1.5rem; text-align: center; font-size: 0.9rem; color: #666;">
-            ¿Necesitas crear una cuenta de administrador?
-            <a href="{% url 'solicitar_codigo' %}" style="color: inherit; font-weight: 600;">
-                Solicitar acceso
-            </a>
-        </p>
     </main>
 
     <footer>
