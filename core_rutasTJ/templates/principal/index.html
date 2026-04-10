@@ -20,7 +20,11 @@
             <strong><i class="fas fa-home"></i> Inicio</strong>
             <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i> Mapa</a>
             <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i> Contacto</a>
-            <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn-admin">Administrador</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
+            {% endif %}
         </nav>
     </header>
 

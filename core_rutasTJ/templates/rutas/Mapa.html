@@ -22,9 +22,13 @@
         </a>
         <nav>
             <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
-            <a href="#"><i class="fas fa-map-marked-alt"></i><strong>Mapa</strong></a>
+            <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i><strong>Mapa</strong></a>
             <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i>Contacto</a>
-            <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
+            {% if user.is_authenticated %}
+                <a href="{% url 'login' %}" class="btn-admin">Administrador</a>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
+            {% endif %}
         </nav>
     </header>
 
