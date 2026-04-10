@@ -2,6 +2,7 @@ from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.password_validation import validate_password
 
+
 class VerificarCodigoForm(forms.Form):
     codigo = forms.CharField(
         max_length=6,
@@ -14,12 +15,13 @@ class VerificarCodigoForm(forms.Form):
         })
     )
 
+
 class CrearAdminForm(forms.Form):
     username = forms.CharField(
         max_length=150,
         label="Nombre de usuario",
         widget=forms.TextInput(attrs={
-            'placeholder': 'nombre_admin',
+            'placeholder': 'usuario_admin',
             'class': 'form-input',
         })
     )
@@ -51,6 +53,32 @@ class CrearAdminForm(forms.Form):
         if p1 and p2 and p1 != p2:
             self.add_error('password2', "Las contraseñas no coinciden.")
         if p1:
-            # Usa los validadores de Django definidos en settings
+            validate_password(p1)
+        return cleaned
+
+
+class NuevaPasswordForm(forms.Form):
+    password1 = forms.CharField(
+        label="Nueva contraseña",
+        widget=forms.PasswordInput(attrs={
+            'placeholder': '••••••••',
+            'class': 'form-input',
+        })
+    )
+    password2 = forms.CharField(
+        label="Confirmar nueva contraseña",
+        widget=forms.PasswordInput(attrs={
+            'placeholder': '••••••••',
+            'class': 'form-input',
+        })
+    )
+
+    def clean(self):
+        cleaned = super().clean()
+        p1 = cleaned.get('password1')
+        p2 = cleaned.get('password2')
+        if p1 and p2 and p1 != p2:
+            self.add_error('password2', "Las contraseñas no coinciden.")
+        if p1:
             validate_password(p1)
         return cleaned

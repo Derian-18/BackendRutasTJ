@@ -15,14 +15,13 @@ from apps.principal.models import Ruta, Parada, Conexion
 from django.db import transaction
 from axes.models import AccessAttempt
 
-from .models import CodigoRegistroAdmin
-from .forms import VerificarCodigoForm, CrearAdminForm
+from .models import CodigoRegistroAdmin, CodigoResetPassword
+from .forms import VerificarCodigoForm, CrearAdminForm, NuevaPasswordForm
 
 
 # ==================== DISTANCIA ====================
 
 def calcular_distancia(lat1, lon1, lat2, lon2):
-    """Retorna distancia en METROS usando Haversine."""
     R = 6371000
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
@@ -34,7 +33,7 @@ def calcular_distancia(lat1, lon1, lat2, lon2):
 
 # ==================== TRANSBORDO AUTOMÁTICO ====================
 
-RADIO_TRANSBORDO = 50  # 50 metros
+RADIO_TRANSBORDO = 50
 
 def buscar_parada_existente_cercana(lat, lon, radio=RADIO_TRANSBORDO):
     delta = radio / 111000
@@ -94,58 +93,54 @@ def administrador_view(request):
     return render(request, 'panel/Administrador.html')
 
 
-# ==================== REGISTRO ADMINISTRADOR ====================
+# ==================== HELPERS ====================
 
 def _generar_codigo():
-    """Genera un código numérico de 6 dígitos."""
     return ''.join(random.choices(string.digits, k=6))
 
 
+def _enviar_codigo(correo, asunto, cuerpo):
+    send_mail(
+        subject=asunto,
+        message=cuerpo,
+        from_email=settings.DEFAULT_FROM_EMAIL,
+        recipient_list=[correo],
+        fail_silently=False,
+    )
+
+
+# ==================== REGISTRO ADMINISTRADOR ====================
+
 def solicitar_codigo_view(request):
-    """
-    Paso 1: Se envía el código directamente al correo de empresa definido en settings.
-    El usuario no necesita ingresar ningún correo.
-    """
     if request.user.is_authenticated:
         return redirect('administrador')
 
     if request.method == "POST":
         correo_empresa = settings.ADMIN_EMPRESA_EMAIL
 
-        # Invalidar códigos anteriores no usados
         CodigoRegistroAdmin.objects.filter(
-            correo=correo_empresa,
-            usado=False
+            correo=correo_empresa, usado=False
         ).update(usado=True)
 
-        # Crear nuevo código
         codigo = _generar_codigo()
-        CodigoRegistroAdmin.objects.create(
-            correo=correo_empresa,
-            codigo=codigo
-        )
+        CodigoRegistroAdmin.objects.create(correo=correo_empresa, codigo=codigo)
 
-        # Enviar correo via Brevo (SMTP)
         try:
-            send_mail(
-                subject="Código de registro administrador - Rutas TJ",
-                message=(
+            _enviar_codigo(
+                correo=correo_empresa,
+                asunto="Código de registro administrador - Rutas TJ",
+                cuerpo=(
                     f"Tu código de verificación para crear una cuenta administrador es:\n\n"
                     f"{codigo}\n\n"
                     f"Este código expira en 15 minutos.\n"
                     f"Si no solicitaste esto, ignora este mensaje."
-                ),
-                from_email=settings.DEFAULT_FROM_EMAIL,
-                recipient_list=[correo_empresa],
-                fail_silently=False,
+                )
             )
         except Exception:
             messages.error(request, "Hubo un error al enviar el correo. Intenta de nuevo.")
             return render(request, 'panel/solicitar_codigo.html')
 
-        # Guardamos en sesión para el siguiente paso
         request.session['registro_correo'] = correo_empresa
-
         messages.success(request, "Código enviado. Revisa el correo de la empresa.")
         return redirect('verificar_codigo')
 
@@ -153,9 +148,6 @@ def solicitar_codigo_view(request):
 
 
 def verificar_codigo_view(request):
-    """
-    Paso 2: El usuario ingresa el código que llegó al correo de empresa.
-    """
     if request.user.is_authenticated:
         return redirect('administrador')
 
@@ -169,28 +161,21 @@ def verificar_codigo_view(request):
         codigo_ingresado = form.cleaned_data['codigo'].strip()
 
         registro = CodigoRegistroAdmin.objects.filter(
-            correo=correo,
-            codigo=codigo_ingresado,
-            usado=False
+            correo=correo, codigo=codigo_ingresado, usado=False
         ).order_by('-creado_en').first()
 
         if not registro or not registro.esta_vigente():
             messages.error(request, "Código inválido o expirado. Solicita uno nuevo.")
             return render(request, 'panel/verificar_codigo.html', {'form': form})
 
-        # Código válido → marcar en sesión que puede proceder
         request.session['registro_verificado'] = True
         request.session['registro_codigo_id'] = registro.id
-
         return redirect('crear_admin')
 
     return render(request, 'panel/verificar_codigo.html', {'form': form})
 
 
 def crear_admin_view(request):
-    """
-    Paso 3: Crear la cuenta administrador luego de verificar el código.
-    """
     if request.user.is_authenticated:
         return redirect('administrador')
 
@@ -203,7 +188,6 @@ def crear_admin_view(request):
     form = CrearAdminForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
-        # Doble check: el código sigue sin usarse
         try:
             registro = CodigoRegistroAdmin.objects.get(id=codigo_id, usado=False)
         except CodigoRegistroAdmin.DoesNotExist:
@@ -224,7 +208,6 @@ def crear_admin_view(request):
             is_staff=True,
         )
 
-        # Marcar código como usado y limpiar sesión
         registro.usado = True
         registro.save()
 
@@ -235,6 +218,164 @@ def crear_admin_view(request):
         return redirect('login')
 
     return render(request, 'panel/crear_admin.html', {'form': form})
+
+
+# ==================== RESET DE CONTRASEÑA ====================
+
+def reset_solicitar_view(request):
+    """Paso 1: Envía el código al correo de empresa."""
+    if request.user.is_authenticated:
+        return redirect('administrador')
+
+    if request.method == "POST":
+        correo_empresa = settings.ADMIN_EMPRESA_EMAIL
+
+        CodigoResetPassword.objects.filter(
+            correo=correo_empresa, usado=False
+        ).update(usado=True)
+
+        codigo = _generar_codigo()
+        CodigoResetPassword.objects.create(correo=correo_empresa, codigo=codigo)
+
+        try:
+            _enviar_codigo(
+                correo=correo_empresa,
+                asunto="Código para restablecer contraseña - Rutas TJ",
+                cuerpo=(
+                    f"Tu código para restablecer la contraseña es:\n\n"
+                    f"{codigo}\n\n"
+                    f"Este código expira en 15 minutos.\n"
+                    f"Si no solicitaste esto, ignora este mensaje."
+                )
+            )
+        except Exception:
+            messages.error(request, "Hubo un error al enviar el correo. Intenta de nuevo.")
+            return render(request, 'panel/reset_solicitar.html')
+
+        request.session['reset_correo'] = correo_empresa
+        messages.success(request, "Código enviado. Revisa el correo de la empresa.")
+        return redirect('reset_verificar')
+
+    return render(request, 'panel/reset_solicitar.html')
+
+
+def reset_verificar_view(request):
+    """
+    Paso 2: Verifica el código. Solo si es válido guarda en sesión y redirige
+    a la selección de usuario. El listado de usuarios nunca se expone aquí.
+    """
+    if request.user.is_authenticated:
+        return redirect('administrador')
+
+    correo = request.session.get('reset_correo')
+    if not correo:
+        return redirect('reset_solicitar')
+
+    form = VerificarCodigoForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        codigo_ingresado = form.cleaned_data['codigo'].strip()
+
+        registro = CodigoResetPassword.objects.filter(
+            correo=correo, codigo=codigo_ingresado, usado=False
+        ).order_by('-creado_en').first()
+
+        if not registro or not registro.esta_vigente():
+            messages.error(request, "Código inválido o expirado. Solicita uno nuevo.")
+            return render(request, 'panel/reset_verificar.html', {'form': form})
+
+        # Código válido: guardamos en sesión y avanzamos
+        request.session['reset_verificado'] = True
+        request.session['reset_codigo_id']  = registro.id
+        return redirect('reset_elegir_usuario')
+
+    return render(request, 'panel/reset_verificar.html', {'form': form})
+
+
+def reset_elegir_usuario_view(request):
+    """
+    Paso 3: Solo accesible tras verificar el código. Muestra el listado de
+    usuarios staff para elegir a cuál resetear.
+    """
+    if request.user.is_authenticated:
+        return redirect('administrador')
+
+    if not request.session.get('reset_verificado'):
+        return redirect('reset_solicitar')
+
+    codigo_id     = request.session.get('reset_codigo_id')
+    usuarios_staff = User.objects.filter(is_staff=True).values_list('username', flat=True)
+
+    if request.method == "POST":
+        username_elegido = request.POST.get('username_reset', '').strip()
+
+        if not username_elegido or not User.objects.filter(username=username_elegido, is_staff=True).exists():
+            messages.error(request, "Selecciona un usuario válido.")
+            return render(request, 'panel/reset_elegir_usuario.html', {'usuarios_staff': usuarios_staff})
+
+        # Verificar que el código sigue vigente antes de avanzar
+        try:
+            registro = CodigoResetPassword.objects.get(id=codigo_id, usado=False)
+        except CodigoResetPassword.DoesNotExist:
+            messages.error(request, "El código ya fue utilizado. Solicita uno nuevo.")
+            return redirect('reset_solicitar')
+
+        if not registro.esta_vigente():
+            messages.error(request, "El código expiró. Solicita uno nuevo.")
+            return redirect('reset_solicitar')
+
+        request.session['reset_username'] = username_elegido
+        return redirect('reset_nueva_password')
+
+    return render(request, 'panel/reset_elegir_usuario.html', {'usuarios_staff': usuarios_staff})
+
+
+def reset_nueva_password_view(request):
+    """Paso 4: Establece la nueva contraseña."""
+    if request.user.is_authenticated:
+        return redirect('administrador')
+
+    if not request.session.get('reset_verificado') or not request.session.get('reset_username'):
+        return redirect('reset_solicitar')
+
+    codigo_id = request.session.get('reset_codigo_id')
+    username  = request.session.get('reset_username')
+
+    form = NuevaPasswordForm(request.POST or None)
+
+    if request.method == "POST" and form.is_valid():
+        try:
+            registro = CodigoResetPassword.objects.get(id=codigo_id, usado=False)
+        except CodigoResetPassword.DoesNotExist:
+            messages.error(request, "El código ya fue utilizado. Solicita uno nuevo.")
+            return redirect('reset_solicitar')
+
+        if not registro.esta_vigente():
+            messages.error(request, "El código expiró. Solicita uno nuevo.")
+            return redirect('reset_solicitar')
+
+        try:
+            user = User.objects.get(username=username, is_staff=True)
+        except User.DoesNotExist:
+            messages.error(request, "Usuario no encontrado.")
+            return redirect('reset_solicitar')
+
+        user.set_password(form.cleaned_data['password1'])
+        user.save()
+
+        registro.usado = True
+        registro.save()
+
+        for key in ['reset_correo', 'reset_verificado', 'reset_codigo_id', 'reset_username']:
+            request.session.pop(key, None)
+
+        messages.success(request, f"Contraseña de '{username}' actualizada. Ya puedes iniciar sesión.")
+        return redirect('login')
+
+    return render(request, 'panel/reset_nueva_password.html', {
+        'form': form,
+        'username': username,
+    })
 
 
 # ==================== RUTAS ====================
@@ -319,6 +460,7 @@ def guardar_ruta(request):
         import traceback
         traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
+
 
 @csrf_exempt
 @user_passes_test(lambda u: u.is_staff, login_url='login')
