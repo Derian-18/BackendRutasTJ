@@ -1,8 +1,8 @@
 /* ================= CONFIGURACIÓN MAPA ================= */
 
-const southWest = L.latLng(32.45, -117.15);
-const northEast = L.latLng(32.60, -116.85);
-const bounds    = L.latLngBounds(southWest, northEast);
+const southWest = L.latLng(32.35, -117.20);
+const northEast = L.latLng(32.55, -116.70);
+const bounds = L.latLngBounds(southWest, northEast);
 
 const map = L.map('map', {
     center: [32.5255, -117.0335],

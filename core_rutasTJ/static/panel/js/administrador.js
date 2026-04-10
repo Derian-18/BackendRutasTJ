@@ -1,7 +1,7 @@
 /* ================= CONFIGURACIÓN MAPA ================= */
 
-const southWest = L.latLng(32.45, -117.15);
-const northEast = L.latLng(32.60, -116.85);
+const southWest = L.latLng(32.35, -117.20);
+const northEast = L.latLng(32.55, -116.70);
 const bounds = L.latLngBounds(southWest, northEast);
 
 const map = L.map('map', {
@@ -13,9 +13,12 @@ const map = L.map('map', {
     maxBoundsViscosity: 1.0
 });
 
+// DESPUÉS — agrega el header con referrerPolicy
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: 12,
-    maxZoom: 18
+    maxZoom: 18,
+    attribution: '&copy; OpenStreetMap contributors',
+    referrerPolicy: 'no-referrer-when-downgrade'
 }).addTo(map);
 
 map.fitBounds(bounds);
