@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views 
+from . import views
 
 urlpatterns = [
     # Autenticación
@@ -7,10 +7,16 @@ urlpatterns = [
     path('dashboard/', views.administrador_view, name='administrador'),
     path('logout/', views.logout_view, name='logout'),
 
-    # Registro administrador (flujo de 3 pasos con código por correo)
+    # Registro administrador (3 pasos)
     path('registro/solicitar/', views.solicitar_codigo_view, name='solicitar_codigo'),
     path('registro/verificar/', views.verificar_codigo_view, name='verificar_codigo'),
     path('registro/crear/', views.crear_admin_view, name='crear_admin'),
+
+    # Reset de contraseña (4 pasos)
+    path('reset/', views.reset_solicitar_view, name='reset_solicitar'),
+    path('reset/verificar/', views.reset_verificar_view, name='reset_verificar'),
+    path('reset/usuario/', views.reset_elegir_usuario_view, name='reset_elegir_usuario'),
+    path('reset/nueva/', views.reset_nueva_password_view, name='reset_nueva_password'),
 
     # Rutas
     path('guardar-ruta/', views.guardar_ruta, name='guardar_ruta'),
