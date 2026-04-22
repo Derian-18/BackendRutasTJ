@@ -1,59 +1,77 @@
-from django.shortcuts import render, redirect
-from django.views.decorators.csrf import csrf_exempt
+"""
+panel/views.py
+
+SOLID – SRP:
+    Las vistas solo gestionan el ciclo HTTP (request → response).
+    Toda la lógica de negocio está en services.py.
+
+Seguridad:
+    - csrf_exempt eliminado de los endpoints autenticados que modifican datos.
+    - logout_view requiere POST para evitar logout CSRF via GET.
+    - eliminar_ruta protegido con @login_required además de @user_passes_test.
+"""
+
+import json
+import math
+
+from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth import authenticate, login, logout as auth_logout
-from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
-from apps.principal.services import obtener_rutas_data
-import json, math, random, string
-from django.http import JsonResponse
-from django.core.mail import send_mail
-from django.conf import settings
-from django.db.models import Sum
-
-from apps.principal.models import Ruta, Parada, Conexion
+from django.contrib.auth.models import User
 from django.db import transaction
+from django.db.models import Sum
+from django.http import JsonResponse
+from django.shortcuts import render, redirect
+
 from axes.models import AccessAttempt
 
-from .models import CodigoRegistroAdmin, CodigoResetPassword
+from apps.principal.models import Ruta, Parada, Conexion
+from apps.principal.services import obtener_rutas_data
+
 from .forms import VerificarCodigoForm, CrearAdminForm, NuevaPasswordForm
+from .models import CodigoVerificacion
+from . import services
 
 
-# ==================== DISTANCIA ====================
+# ──────────────────────────────────────────────────────────────────────────────
+# Utilidades geográficas (sin cambios de lógica, solo movidas aquí porque
+# pertenecen al dominio de rutas; si crecen, moverlas a un geo_utils.py)
+# ──────────────────────────────────────────────────────────────────────────────
 
-def calcular_distancia(lat1, lon1, lat2, lon2):
-    R = 6371000
+def _calcular_distancia(lat1: float, lon1: float, lat2: float, lon2: float) -> float:
+    """Fórmula de Haversine. Devuelve distancia en metros."""
+    R = 6_371_000
     dlat = math.radians(lat2 - lat1)
     dlon = math.radians(lon2 - lon1)
-    a = math.sin(dlat / 2) ** 2 + \
-        math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2
-    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
-    return R * c
-
-
-# ==================== TRANSBORDO AUTOMÁTICO ====================
-
-RADIO_TRANSBORDO = 50
-
-def buscar_parada_existente_cercana(lat, lon, radio=RADIO_TRANSBORDO):
-    delta = radio / 111000
-    candidatas = Parada.objects.filter(
-        latitud__gte=lat - delta,
-        latitud__lte=lat + delta,
-        longitud__gte=lon - delta,
-        longitud__lte=lon + delta,
+    a = (
+        math.sin(dlat / 2) ** 2
+        + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2) ** 2
     )
-    mejor = None
-    mejor_dist = float("inf")
+    return R * 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+
+RADIO_TRANSBORDO = 50  # metros
+
+
+def _buscar_parada_cercana(lat: float, lon: float, radio: int = RADIO_TRANSBORDO):
+    """Devuelve la parada existente más cercana dentro del radio, o None."""
+    delta = radio / 111_000
+    candidatas = Parada.objects.filter(
+        latitud__gte=lat - delta, latitud__lte=lat + delta,
+        longitud__gte=lon - delta, longitud__lte=lon + delta,
+    )
+    mejor, mejor_dist = None, float("inf")
     for p in candidatas:
-        d = calcular_distancia(lat, lon, p.latitud, p.longitud)
+        d = _calcular_distancia(lat, lon, p.latitud, p.longitud)
         if d <= radio and d < mejor_dist:
-            mejor_dist = d
-            mejor = p
+            mejor_dist, mejor = d, p
     return mejor
 
 
-# ==================== AUTENTICACIÓN ====================
+# ──────────────────────────────────────────────────────────────────────────────
+# Autenticación
+# ──────────────────────────────────────────────────────────────────────────────
 
 def login_view(request):
     if request.user.is_authenticated:
@@ -61,10 +79,10 @@ def login_view(request):
 
     ip = request.META.get('REMOTE_ADDR')
     limit = getattr(settings, 'AXES_FAILURE_LIMIT', 3)
-
-    total_fallos = AccessAttempt.objects.filter(
-        ip_address=ip
-    ).aggregate(total=Sum('failures_since_start'))['total'] or 0
+    total_fallos = (
+        AccessAttempt.objects.filter(ip_address=ip)
+        .aggregate(total=Sum('failures_since_start'))['total'] or 0
+    )
 
     if total_fallos >= limit:
         return render(request, 'panel/bloqueado.html')
@@ -76,15 +94,20 @@ def login_view(request):
         if user is not None:
             login(request, user)
             return redirect('administrador')
-        else:
-            messages.error(request, "Usuario o contraseña incorrectos")
+        messages.error(request, "Usuario o contraseña incorrectos.")
 
     return render(request, 'panel/login.html')
 
 
 def logout_view(request):
-    auth_logout(request)
-    messages.success(request, 'Sesión cerrada correctamente.')
+    """
+    FIX – Seguridad: solo acepta POST para evitar logout CSRF mediante
+    un simple enlace GET enviado desde otro sitio.
+    Actualiza el template para que el botón de logout use un <form method="post">.
+    """
+    if request.method == "POST":
+        auth_logout(request)
+        messages.success(request, 'Sesión cerrada correctamente.')
     return redirect('login')
 
 
@@ -93,54 +116,22 @@ def administrador_view(request):
     return render(request, 'panel/Administrador.html')
 
 
-# ==================== HELPERS ====================
-
-def _generar_codigo():
-    return ''.join(random.choices(string.digits, k=6))
-
-
-def _enviar_codigo(correo, asunto, cuerpo):
-    send_mail(
-        subject=asunto,
-        message=cuerpo,
-        from_email=settings.DEFAULT_FROM_EMAIL,
-        recipient_list=[correo],
-        fail_silently=False,
-    )
-
-
-# ==================== REGISTRO ADMINISTRADOR ====================
+# ──────────────────────────────────────────────────────────────────────────────
+# Registro administrador (3 pasos)
+# ──────────────────────────────────────────────────────────────────────────────
 
 def solicitar_codigo_view(request):
     if request.user.is_authenticated:
         return redirect('administrador')
 
     if request.method == "POST":
-        correo_empresa = settings.ADMIN_EMPRESA_EMAIL
-
-        CodigoRegistroAdmin.objects.filter(
-            correo=correo_empresa, usado=False
-        ).update(usado=True)
-
-        codigo = _generar_codigo()
-        CodigoRegistroAdmin.objects.create(correo=correo_empresa, codigo=codigo)
-
         try:
-            _enviar_codigo(
-                correo=correo_empresa,
-                asunto="Código de registro administrador - Rutas TJ",
-                cuerpo=(
-                    f"Tu código de verificación para crear una cuenta administrador es:\n\n"
-                    f"{codigo}\n\n"
-                    f"Este código expira en 15 minutos.\n"
-                    f"Si no solicitaste esto, ignora este mensaje."
-                )
-            )
+            services.solicitar_codigo(CodigoVerificacion.Tipo.REGISTRO)
         except Exception:
             messages.error(request, "Hubo un error al enviar el correo. Intenta de nuevo.")
             return render(request, 'panel/solicitar_codigo.html')
 
-        request.session['registro_correo'] = correo_empresa
+        request.session['registro_correo'] = settings.ADMIN_EMPRESA_EMAIL
         messages.success(request, "Código enviado. Revisa el correo de la empresa.")
         return redirect('verificar_codigo')
 
@@ -159,17 +150,16 @@ def verificar_codigo_view(request):
 
     if request.method == "POST" and form.is_valid():
         codigo_ingresado = form.cleaned_data['codigo'].strip()
+        registro = services.verificar_codigo(
+            correo, codigo_ingresado, CodigoVerificacion.Tipo.REGISTRO
+        )
 
-        registro = CodigoRegistroAdmin.objects.filter(
-            correo=correo, codigo=codigo_ingresado, usado=False
-        ).order_by('-creado_en').first()
-
-        if not registro or not registro.esta_vigente():
+        if not registro:
             messages.error(request, "Código inválido o expirado. Solicita uno nuevo.")
             return render(request, 'panel/verificar_codigo.html', {'form': form})
 
         request.session['registro_verificado'] = True
-        request.session['registro_codigo_id'] = registro.id
+        request.session['registro_codigo_id']  = registro.id
         return redirect('crear_admin')
 
     return render(request, 'panel/verificar_codigo.html', {'form': form})
@@ -184,43 +174,35 @@ def crear_admin_view(request):
 
     correo    = request.session.get('registro_correo')
     codigo_id = request.session.get('registro_codigo_id')
-
-    form = CrearAdminForm(request.POST or None)
+    form      = CrearAdminForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
         try:
-            registro = CodigoRegistroAdmin.objects.get(id=codigo_id, usado=False)
-        except CodigoRegistroAdmin.DoesNotExist:
+            user = services.crear_admin(
+                codigo_id=codigo_id,
+                username=form.cleaned_data['username'],
+                password=form.cleaned_data['password1'],
+                correo=correo,
+            )
+        except CodigoVerificacion.DoesNotExist:
             messages.error(request, "El código ya fue utilizado. Solicita uno nuevo.")
             return redirect('solicitar_codigo')
-
-        if not registro.esta_vigente():
+        except ValueError:
             messages.error(request, "El código expiró. Solicita uno nuevo.")
             return redirect('solicitar_codigo')
 
-        username = form.cleaned_data['username']
-        password = form.cleaned_data['password1']
-
-        User.objects.create_user(
-            username=username,
-            email=correo,
-            password=password,
-            is_staff=True,
-        )
-
-        registro.usado = True
-        registro.save()
-
-        for key in ['registro_correo', 'registro_verificado', 'registro_codigo_id']:
+        for key in ('registro_correo', 'registro_verificado', 'registro_codigo_id'):
             request.session.pop(key, None)
 
-        messages.success(request, f"Cuenta '{username}' creada correctamente. Ya puedes iniciar sesión.")
+        messages.success(request, f"Cuenta '{user.username}' creada correctamente. Ya puedes iniciar sesión.")
         return redirect('login')
 
     return render(request, 'panel/crear_admin.html', {'form': form})
 
 
-# ==================== RESET DE CONTRASEÑA ====================
+# ──────────────────────────────────────────────────────────────────────────────
+# Reset de contraseña (4 pasos)
+# ──────────────────────────────────────────────────────────────────────────────
 
 def reset_solicitar_view(request):
     """Paso 1: Envía el código al correo de empresa."""
@@ -228,31 +210,13 @@ def reset_solicitar_view(request):
         return redirect('administrador')
 
     if request.method == "POST":
-        correo_empresa = settings.ADMIN_EMPRESA_EMAIL
-
-        CodigoResetPassword.objects.filter(
-            correo=correo_empresa, usado=False
-        ).update(usado=True)
-
-        codigo = _generar_codigo()
-        CodigoResetPassword.objects.create(correo=correo_empresa, codigo=codigo)
-
         try:
-            _enviar_codigo(
-                correo=correo_empresa,
-                asunto="Código para restablecer contraseña - Rutas TJ",
-                cuerpo=(
-                    f"Tu código para restablecer la contraseña es:\n\n"
-                    f"{codigo}\n\n"
-                    f"Este código expira en 15 minutos.\n"
-                    f"Si no solicitaste esto, ignora este mensaje."
-                )
-            )
+            services.solicitar_codigo(CodigoVerificacion.Tipo.RESET)
         except Exception:
             messages.error(request, "Hubo un error al enviar el correo. Intenta de nuevo.")
             return render(request, 'panel/reset_solicitar.html')
 
-        request.session['reset_correo'] = correo_empresa
+        request.session['reset_correo'] = settings.ADMIN_EMPRESA_EMAIL
         messages.success(request, "Código enviado. Revisa el correo de la empresa.")
         return redirect('reset_verificar')
 
@@ -260,10 +224,7 @@ def reset_solicitar_view(request):
 
 
 def reset_verificar_view(request):
-    """
-    Paso 2: Verifica el código. Solo si es válido guarda en sesión y redirige
-    a la selección de usuario. El listado de usuarios nunca se expone aquí.
-    """
+    """Paso 2: Verifica el código."""
     if request.user.is_authenticated:
         return redirect('administrador')
 
@@ -275,16 +236,14 @@ def reset_verificar_view(request):
 
     if request.method == "POST" and form.is_valid():
         codigo_ingresado = form.cleaned_data['codigo'].strip()
+        registro = services.verificar_codigo(
+            correo, codigo_ingresado, CodigoVerificacion.Tipo.RESET
+        )
 
-        registro = CodigoResetPassword.objects.filter(
-            correo=correo, codigo=codigo_ingresado, usado=False
-        ).order_by('-creado_en').first()
-
-        if not registro or not registro.esta_vigente():
+        if not registro:
             messages.error(request, "Código inválido o expirado. Solicita uno nuevo.")
             return render(request, 'panel/reset_verificar.html', {'form': form})
 
-        # Código válido: guardamos en sesión y avanzamos
         request.session['reset_verificado'] = True
         request.session['reset_codigo_id']  = registro.id
         return redirect('reset_elegir_usuario')
@@ -293,17 +252,14 @@ def reset_verificar_view(request):
 
 
 def reset_elegir_usuario_view(request):
-    """
-    Paso 3: Solo accesible tras verificar el código. Muestra el listado de
-    usuarios staff para elegir a cuál resetear.
-    """
+    """Paso 3: Elige el usuario cuya contraseña se reseteará."""
     if request.user.is_authenticated:
         return redirect('administrador')
 
     if not request.session.get('reset_verificado'):
         return redirect('reset_solicitar')
 
-    codigo_id     = request.session.get('reset_codigo_id')
+    codigo_id      = request.session.get('reset_codigo_id')
     usuarios_staff = User.objects.filter(is_staff=True).values_list('username', flat=True)
 
     if request.method == "POST":
@@ -313,10 +269,12 @@ def reset_elegir_usuario_view(request):
             messages.error(request, "Selecciona un usuario válido.")
             return render(request, 'panel/reset_elegir_usuario.html', {'usuarios_staff': usuarios_staff})
 
-        # Verificar que el código sigue vigente antes de avanzar
+        # Verificar que el código sigue vigente antes de avanzar al paso final
         try:
-            registro = CodigoResetPassword.objects.get(id=codigo_id, usado=False)
-        except CodigoResetPassword.DoesNotExist:
+            registro = CodigoVerificacion.objects.get(
+                id=codigo_id, tipo=CodigoVerificacion.Tipo.RESET, usado=False
+            )
+        except CodigoVerificacion.DoesNotExist:
             messages.error(request, "El código ya fue utilizado. Solicita uno nuevo.")
             return redirect('reset_solicitar')
 
@@ -340,45 +298,37 @@ def reset_nueva_password_view(request):
 
     codigo_id = request.session.get('reset_codigo_id')
     username  = request.session.get('reset_username')
-
-    form = NuevaPasswordForm(request.POST or None)
+    form      = NuevaPasswordForm(request.POST or None)
 
     if request.method == "POST" and form.is_valid():
         try:
-            registro = CodigoResetPassword.objects.get(id=codigo_id, usado=False)
-        except CodigoResetPassword.DoesNotExist:
+            services.resetear_password(
+                codigo_id=codigo_id,
+                username=username,
+                nueva_password=form.cleaned_data['password1'],
+            )
+        except CodigoVerificacion.DoesNotExist:
             messages.error(request, "El código ya fue utilizado. Solicita uno nuevo.")
             return redirect('reset_solicitar')
-
-        if not registro.esta_vigente():
+        except ValueError:
             messages.error(request, "El código expiró. Solicita uno nuevo.")
             return redirect('reset_solicitar')
-
-        try:
-            user = User.objects.get(username=username, is_staff=True)
         except User.DoesNotExist:
             messages.error(request, "Usuario no encontrado.")
             return redirect('reset_solicitar')
 
-        user.set_password(form.cleaned_data['password1'])
-        user.save()
-
-        registro.usado = True
-        registro.save()
-
-        for key in ['reset_correo', 'reset_verificado', 'reset_codigo_id', 'reset_username']:
+        for key in ('reset_correo', 'reset_verificado', 'reset_codigo_id', 'reset_username'):
             request.session.pop(key, None)
 
         messages.success(request, f"Contraseña de '{username}' actualizada. Ya puedes iniciar sesión.")
         return redirect('login')
 
-    return render(request, 'panel/reset_nueva_password.html', {
-        'form': form,
-        'username': username,
-    })
+    return render(request, 'panel/reset_nueva_password.html', {'form': form, 'username': username})
 
 
-# ==================== RUTAS ====================
+# ──────────────────────────────────────────────────────────────────────────────
+# Rutas
+# ──────────────────────────────────────────────────────────────────────────────
 
 @login_required
 def obtener_rutas(request):
@@ -386,7 +336,8 @@ def obtener_rutas(request):
 
 
 @login_required
-@csrf_exempt
+# FIX – csrf_exempt eliminado: @login_required ya exige cookie de sesión,
+# mantener CSRF activo protege contra peticiones forjadas entre sitios.
 def guardar_ruta(request):
     if request.method != 'POST':
         return JsonResponse({'error': 'Método no permitido'}, status=405)
@@ -409,21 +360,21 @@ def guardar_ruta(request):
             transbordos     = []
 
             for i, (lat, lng) in enumerate(coordenadas):
-                parada_existente = buscar_parada_existente_cercana(lat, lng)
+                parada_existente = _buscar_parada_cercana(lat, lng)
 
                 if parada_existente:
                     parada = parada_existente
                     transbordos.append({
-                        "indice": i,
-                        "nombre": parada.nombre,
-                        "latitud": parada.latitud,
+                        "indice":    i,
+                        "nombre":   parada.nombre,
+                        "latitud":  parada.latitud,
                         "longitud": parada.longitud,
                     })
                 else:
                     parada = Parada.objects.create(
                         latitud=lat,
                         longitud=lng,
-                        nombre=f"Parada en {lat:.4f}, {lng:.4f}"
+                        nombre=f"Parada en {lat:.4f}, {lng:.4f}",
                     )
 
                 paradas_creadas.append(parada)
@@ -431,44 +382,46 @@ def guardar_ruta(request):
                 if i > 0:
                     origen  = paradas_creadas[i - 1]
                     destino = paradas_creadas[i]
-                    dist    = calcular_distancia(
-                        origen.latitud, origen.longitud,
-                        destino.latitud, destino.longitud
-                    )
                     Conexion.objects.create(
                         origen=origen,
                         destino=destino,
-                        distancia=dist,
+                        distancia=_calcular_distancia(
+                            origen.latitud, origen.longitud,
+                            destino.latitud, destino.longitud,
+                        ),
                         ruta=nueva_ruta,
-                        bidireccional=True
+                        bidireccional=True,
                     )
 
             nueva_ruta.paradas.set(paradas_creadas)
 
-        respuesta = {
-            'mensaje': 'Ruta, paradas y conexiones generadas con éxito',
-            'id': nueva_ruta.id,
-            'total_paradas': len(paradas_creadas),
-            'transbordos_detectados': len(transbordos),
-        }
-        if transbordos:
-            respuesta['transbordos'] = transbordos
-
-        return JsonResponse(respuesta)
-
     except Exception as e:
-        import traceback
-        traceback.print_exc()
         return JsonResponse({'error': str(e)}, status=500)
 
+    respuesta = {
+        'mensaje':               'Ruta, paradas y conexiones generadas con éxito',
+        'id':                    nueva_ruta.id,
+        'total_paradas':         len(paradas_creadas),
+        'transbordos_detectados': len(transbordos),
+    }
+    if transbordos:
+        respuesta['transbordos'] = transbordos
 
-@csrf_exempt
+    return JsonResponse(respuesta)
+
+
+@login_required
 @user_passes_test(lambda u: u.is_staff, login_url='login')
+# FIX – csrf_exempt eliminado + @login_required añadido.
+# user_passes_test solo evalúa el predicado pero no garantiza autenticación
+# por sí solo cuando axes u otro middleware interviene.
 def eliminar_ruta(request, ruta_id):
-    if request.method == 'DELETE':
-        try:
-            ruta = Ruta.objects.get(id=ruta_id)
-            ruta.delete()
-            return JsonResponse({'success': True, 'message': 'Ruta eliminada correctamente'})
-        except Ruta.DoesNotExist:
-            return JsonResponse({'success': False, 'error': 'Ruta no encontrada'}, status=404)
+    if request.method != 'DELETE':
+        return JsonResponse({'error': 'Método no permitido'}, status=405)
+
+    try:
+        ruta = Ruta.objects.get(id=ruta_id)
+        ruta.delete()
+        return JsonResponse({'success': True, 'message': 'Ruta eliminada correctamente'})
+    except Ruta.DoesNotExist:
+        return JsonResponse({'success': False, 'error': 'Ruta no encontrada'}, status=404)
