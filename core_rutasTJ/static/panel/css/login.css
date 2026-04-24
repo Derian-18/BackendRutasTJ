@@ -1,79 +1,29 @@
 /* ============================================
-   RESET Y CONFIGURACIÓN GENERAL
+   HEREDA DE BASE.CSS
    ============================================ */
-* {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
-}
+@import url('../../principal/css/base.css');
 
-body {
-    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    color: #333;
-    background: linear-gradient(to bottom, #ffffff 0%, #ffffff 100%);
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    position: relative;
-    overflow-x: hidden;
-}
 
 /* ============================================
-   HEADER Y NAVEGACIÓN (UNIFICADO)
+   SOBREESCRITURAS LOCALES
    ============================================ */
+body {
+    background: #ffffff;
+    position: relative;
+}
+
 header {
-    background-color: #1e3c72; /* O var(--azul-oscuro) */
-    padding: 1rem 5%; /* El margen lateral ahora es siempre el 5% */
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-    z-index: 100;
     width: 100%;
 }
 
-.logo {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    color: white;
-    text-decoration: none;
-    font-size: 1.5rem;
-    font-weight: bold;
-}
-
-.logo-icon {
-    width: 40px;
-    height: 40px;
-    background-color: white;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #1e3c72;
-}
-
-nav {
-    display: flex;
-    gap: 2rem;
-    align-items: center;
-}
-
 nav a, nav strong {
-    color: white;
-    text-decoration: none;
-    display: flex;
-    align-items: center;
-    gap: 0.5rem;
-    font-size: 1rem;
-    transition: opacity 0.3s;
-    white-space: nowrap; /* Evita que el texto salte de línea y cambie el alto */
+    white-space: nowrap;
 }
 
-nav a:hover {
-    opacity: 0.8;
-}
 
+/* ============================================
+   BOTÓN ADMIN
+   ============================================ */
 .btn-admin {
     background-color: transparent;
     border: 2px solid white;
@@ -84,15 +34,10 @@ nav a:hover {
     text-decoration: none;
 }
 
-/* Encabezado del Formulario */
-header h2 {
-    text-align: center;
-    color: #00509d;
-    margin-top: 40px;
-    font-size: 2rem;
-}
 
-/* Contenedor Principal (Login Card) */
+/* ============================================
+   MAIN / LOGIN CARD
+   ============================================ */
 main {
     flex: 1;
     display: flex;
@@ -106,12 +51,11 @@ form {
     background: white;
     padding: 30px;
     border-radius: 12px;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
     width: 100%;
     max-width: 400px;
 }
 
-/* Inputs y Etiquetas */
 label {
     display: block;
     margin-bottom: 8px;
@@ -133,7 +77,6 @@ input:focus {
     border-color: #007bff;
 }
 
-/* Botón */
 button {
     width: 100%;
     padding: 12px;
@@ -151,7 +94,7 @@ button:hover {
     background-color: #007bff;
 }
 
-/* Mensajes de error/Django */
+/* Mensajes de error */
 p {
     background-color: #ffffff;
     color: #c0392b;
@@ -163,7 +106,10 @@ p {
     text-align: center;
 }
 
-/* ================= CONTENEDOR PRINCIPAL ================= */
+
+/* ============================================
+   TOAST
+   ============================================ */
 .toast-container {
     position: fixed;
     top: 20px;
@@ -172,12 +118,11 @@ p {
     display: flex;
     flex-direction: column;
     gap: 12px;
-    pointer-events: none; /* Evita que el contenedor bloquee clicks si está vacío */
+    pointer-events: none;
 }
 
-/* ================= DISEÑO DEL TOAST ================= */
 .toast {
-    pointer-events: auto; /* Reactiva los clicks para el toast individual */
+    pointer-events: auto;
     min-width: 280px;
     max-width: 400px;
     background: #ffffff;
@@ -188,35 +133,22 @@ p {
     align-items: center;
     box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
     border-left: 6px solid #cbd5e1;
-    
-    /* Animación de entrada */
     animation: slideIn 0.3s ease forwards;
     transition: opacity 0.4s ease, transform 0.4s ease;
 }
 
 @keyframes slideIn {
-    from {
-        transform: translateX(100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(0);
-        opacity: 1;
-    }
+    from { transform: translateX(100%); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
 }
 
-.toast.hide {
-    transform: translateX(100%);
-    opacity: 0;
-}
+.toast.hide { transform: translateX(100%); opacity: 0; }
 
-/* ================= VARIANTES DE COLOR ================= */
 .toast.success { border-left-color: #22c55e; }
 .toast.error   { border-left-color: #ef4444; }
 .toast.info    { border-left-color: #3b82f6; }
 .toast.warning { border-left-color: #f59e0b; }
 
-/* ================= ELEMENTOS INTERNOS ================= */
 .toast-content {
     display: flex;
     align-items: center;
@@ -224,7 +156,6 @@ p {
 }
 
 .toast-msg {
-    font-family: system-ui, -apple-system, sans-serif;
     font-size: 14px;
     color: #1e293b;
     font-weight: 500;
@@ -238,13 +169,19 @@ p {
     cursor: pointer;
     padding: 0 4px;
     line-height: 1;
+    width: auto;          /* cancela el width:100% del button general */
+    padding: 0 4px;
 }
 
 .toast-close:hover {
     color: #1e293b;
+    background-color: transparent;
 }
 
-/* Footer */
+
+/* ============================================
+   FOOTER
+   ============================================ */
 footer {
     text-align: center;
     padding: 20px;

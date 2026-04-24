@@ -1,47 +1,38 @@
+{% extends 'principal/base.html' %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Crear Cuenta | Rutas TJ</title>
-    <link rel="stylesheet" href="{% static 'panel/css/login.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>{% block title %}Crear Cuenta | Rutas TJ{% endblock %}</title>
+
+    {% block extra_css %}
+        <link rel="stylesheet" href="{% static 'panel/css/login.css' %}">
+    {% endblock %}
+
 </head>
 <body>
 
-    <div id="toast-container" class="toast-container">
-        {% if messages %}
-            {% for message in messages %}
-                <div class="toast {{ message.tags }}" role="alert">
-                    <div class="toast-content">
-                        <span class="toast-icon">
-                            {% if message.tags == 'success' %}✅
-                            {% elif message.tags == 'error' %}❌
-                            {% else %}ℹ️{% endif %}
-                        </span>
-                        <span class="toast-msg">{{ message }}</span>
+    {% block content %}
+        <div id="toast-container" class="toast-container">
+            {% if messages %}
+                {% for message in messages %}
+                    <div class="toast {{ message.tags }}" role="alert">
+                        <div class="toast-content">
+                            <span class="toast-icon">
+                                {% if message.tags == 'success' %}✅
+                                {% elif message.tags == 'error' %}❌
+                                {% else %}ℹ️{% endif %}
+                            </span>
+                            <span class="toast-msg">{{ message }}</span>
+                        </div>
+                        <button class="toast-close" onclick="this.parentElement.remove()">×</button>
                     </div>
-                    <button class="toast-close" onclick="this.parentElement.remove()">×</button>
-                </div>
-            {% endfor %}
-        {% endif %}
-    </div>
+                {% endfor %}
+            {% endif %}
+        </div>
 
-    <header>
-        <a href="{% url 'home' %}" class="logo">
-            <div class="logo-icon"><i class="fas fa-bus"></i></div>
-            Rutas TJ
-        </a>
-        <nav>
-            <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
-            <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i> Mapa</a>
-            <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i> Contacto</a>
-            <a href="{% url 'login' %}" class="btn-admin"><strong>Iniciar sesión</strong></a>
-        </nav>
-    </header>
-
-    <main>
         <h2>Crear cuenta administrador</h2>
         <p style="text-align:center; color:#666; margin-bottom:1.5rem; font-size:0.95rem;">
             Código verificado. Elige un nombre de administrador y contraseña.
@@ -74,22 +65,20 @@
 
             <button type="submit">Crear cuenta</button>
         </form>
-    </main>
+    {% endblock %}
 
-    <footer>
-        &copy; {% now "Y" %} Rutas TJ - Todos los derechos reservados.
-    </footer>
-
-    <script>
-        document.addEventListener('DOMContentLoaded', () => {
-            const toasts = document.querySelectorAll('.toast');
-            toasts.forEach(toast => {
-                setTimeout(() => {
-                    toast.classList.add('hide');
-                    setTimeout(() => toast.remove(), 400);
-                }, 4000);
+    {% block extra_scriptss %}
+        <script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const toasts = document.querySelectorAll('.toast');
+                toasts.forEach(toast => {
+                    setTimeout(() => {
+                        toast.classList.add('hide');
+                        setTimeout(() => toast.remove(), 400);
+                    }, 4000);
+                });
             });
-        });
-    </script>
+        </script>
+    {% endblock %}
 </body>
 </html>

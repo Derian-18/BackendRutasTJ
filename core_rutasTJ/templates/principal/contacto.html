@@ -1,72 +1,59 @@
+{% extends 'principal/base.html' %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rutas TJ - Contacto</title>
-    <link rel="stylesheet" href="{% static 'principal/css/contacto.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>{% block title %}Rutas TJ - Contacto{% endblock %}</title>
+    {% block extra_css %}
+        <link rel="stylesheet" href="{% static 'principal/css/contacto.css' %}">
+    {% endblock %}
 </head>
 <body>
-    <header>
-        <a href="{% url 'home' %}" class="logo">
-            <div class="logo-icon">
-                <i class="fas fa-bus"></i>
-            </div>
-            Rutas TJ
-        </a>
-        <nav>
-            <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
-            <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i> Mapa</a>
-            <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i> <strong>Contacto</strong></a>
-            {% if user.is_authenticated %}
-                <a href="{% url 'login' %}" class="btn-admin">Administrador</a>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
-            {% endif %}
-        </nav>
-    </header>
 
-    {% if messages %}
-    <div class="messages">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }}">
-                {{ message }}
-            </div>
-        {% endfor %}
-    </div>
-    {% endif %}
-
-    <main class="container">
-
-        
-
-        <div class="contact-card">
-            <h1>Contacto</h1>
-            <p class="subtitle">¿Tienes alguna duda o sugerencia sobre las rutas de Tijuana?</p>
-
-            <form action="" method="POST">
-                {% csrf_token %}
-
-                <!-- Campo invisible para bots (en caso de ataque) -->
-                <div style="position: absolute; left: -5000px;" aria-hidden="true">
-                    <input type="text" name="hp_field" id="hp_field" tabindex="-1" autocomplete="off">
+    {% block content %}
+    
+        {% if messages %}
+        <div class="messages">
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }}">
+                    {{ message }}
                 </div>
-                
-                <div class="form-row">
-                    <input type="text" name="nombre" placeholder="Tu nombre" required>
-                    <input type="email" name="correo" placeholder="Tu correo electrónico" required>
-                </div>
-
-                <textarea name="mensaje" placeholder="Escribe tu mensaje aquí..." required></textarea>
-
-                <button type="submit" class="submit-btn">Enviar mensaje</button>
-            </form>
+            {% endfor %}
         </div>
-    </main>
+        {% endif %}
 
-    <div class="wave-bottom"></div>
+        <div class="container">
+            <div class="contact-card">
+                <h1>Contacto</h1>
+                <p class="subtitle">¿Tienes alguna duda o sugerencia sobre las rutas de Tijuana?</p>
 
+                <form action="" method="POST">
+                    {% csrf_token %}
+
+                    <!-- Campo invisible para bots (en caso de ataque) -->
+                    <div style="position: absolute; left: -5000px;" aria-hidden="true">
+                        <input type="text" name="hp_field" id="hp_field" tabindex="-1" autocomplete="off">
+                    </div>
+
+                    <div class="form-row">
+                        <input type="text" name="nombre" placeholder="Tu nombre" required>
+                        <input type="email" name="correo" placeholder="Tu correo electrónico" required>
+                    </div>
+
+                    <textarea name="mensaje" placeholder="Escribe tu mensaje aquí..." required></textarea>
+
+                    <button type="submit" class="submit-btn">Enviar mensaje</button>
+                </form>
+            </div>
+        </div>    
+
+        <div class="wave-bottom"></div>
+    {% endblock %}
+
+    {% block footer %}
+
+    {% endblock %}
 </body>
 </html>

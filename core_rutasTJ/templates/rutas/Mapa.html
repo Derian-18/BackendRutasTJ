@@ -1,18 +1,23 @@
+{% extends 'principal/base.html' %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <title>Mapa de Rutas TJ</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
-    <!--Iconos-->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="{% static 'rutas/css/mapa.css' %}">
-    <link rel="stylesheet" href="{% static 'rutas/css/elementos.css' %}">
-    <link rel="stylesheet" href="{% static 'rutas/css/simulacion.css' %}">
+    <title>{% block title %}Mapa de Rutas TJ{% endblock %}</title>
+
+    {% block extra_js %}
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    {% endblock %}
+
+    {% block extra_css %}
+        <link rel="stylesheet" href="{% static 'rutas/css/mapa.css' %}">
+        <link rel="stylesheet" href="{% static 'rutas/css/elementos.css' %}">
+        <link rel="stylesheet" href="{% static 'rutas/css/simulacion.css' %}">
+    {% endblock %}
+    
 </head>
 <body>
-
     <header>
         <a href="{% url 'home' %}" class="logo">
             <div class="logo-icon">
@@ -32,7 +37,7 @@
         </nav>
     </header>
 
-<main>
+{% block content %}
     <h1>Panel de Rutas</h1>
 
     <div id="map" style="height: 400px; width: 100%; margin-bottom: 20px;"></div>
@@ -66,15 +71,13 @@
             </tbody>
         </table>
     </section>
-</main>
+{% endblock %}
 
-<footer>
-
-</footer>
-
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="{% static 'rutas/js/mapa.js' %}"></script>
-<script src="{% static 'rutas/js/simulacion.js' %}"></script>
+{% block extra_scripts %}
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="{% static 'rutas/js/mapa.js' %}"></script>
+    <script src="{% static 'rutas/js/simulacion.js' %}"></script>
+{% endblock %}
 
 </body>
 </html>

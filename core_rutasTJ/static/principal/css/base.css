@@ -1,0 +1,140 @@
+/* ============================================
+   BASE.CSS — ESTILOS PADRE
+   Importa este archivo en tus hojas de estilo hijas:
+   @import url('base.css');
+   ============================================ */
+
+
+/* ============================================
+   VARIABLES
+   ============================================ */
+:root {
+    /* Paleta de colores */
+    --azul-oscuro:     #1e3c72;
+    --azul-brillante:  #2a5298;
+    --azul-claro:      #eef4f8;
+    --blanco:          #ffffff;
+    --texto:           #333333;
+
+    /* Tipografía */
+    --fuente-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto,
+                   Oxygen, Ubuntu, Cantarell, sans-serif;
+    --tamaño-base:  1rem;
+    --tamaño-logo:  1.5rem;
+    --tamaño-nav:   1rem;
+
+    /* Espaciado */
+    --padding-header:  1rem 5%;
+    --gap-nav:         2rem;
+    --gap-logo:        0.75rem;
+    --gap-nav-item:    0.5rem;
+
+    /* Iconos */
+    --tamaño-logo-icon: 40px;
+    --tamaño-nav-icon:  20px;
+
+    /* Sombras */
+    --sombra-header: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+    /* Transiciones */
+    --transicion: 0.3s ease;
+
+    /* Z-index */
+    --z-header: 100;
+}
+
+
+/* ============================================
+   RESET
+   ============================================ */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family:    var(--fuente-base);
+    font-size:      var(--tamaño-base);
+    color:          var(--texto);
+    background:     linear-gradient(to bottom, var(--blanco) 0%, var(--azul-claro) 100%);
+    min-height:     100vh;
+    display:        flex;
+    flex-direction: column;
+    overflow-x:     hidden;
+}
+
+
+/* ============================================
+   HEADER Y NAVEGACIÓN
+   ============================================ */
+header {
+    background-color: var(--azul-oscuro);
+    padding:          var(--padding-header);
+    display:          flex;
+    justify-content:  space-between;
+    align-items:      center;
+    box-shadow:       var(--sombra-header);
+    z-index:          var(--z-header);
+}
+
+/* --- Logo --- */
+.logo {
+    display:         flex;
+    align-items:     center;
+    gap:             var(--gap-logo);
+    color:           var(--blanco);
+    text-decoration: none;
+    font-size:       var(--tamaño-logo);
+    font-weight:     bold;
+}
+
+.logo-icon {
+    width:            var(--tamaño-logo-icon);
+    height:           var(--tamaño-logo-icon);
+    background-color: var(--blanco);
+    border-radius:    4px;
+    display:          flex;
+    align-items:      center;
+    justify-content:  center;
+    color:            var(--azul-oscuro);
+    padding:          4px;
+    flex-shrink:      0;
+}
+
+/* --- Nav --- */
+nav {
+    display:     flex;
+    gap:         var(--gap-nav);
+    align-items: center;
+}
+
+nav a,
+nav strong {
+    color:           var(--blanco);
+    text-decoration: none;
+    display:         flex;
+    align-items:     center;
+    gap:             var(--gap-nav-item);
+    font-size:       var(--tamaño-nav);
+    transition:      opacity var(--transicion);
+}
+
+nav a:hover {
+    opacity: 0.8;
+}
+
+.nav-icon-text {
+    display:     flex;
+    align-items: center;
+    gap:         var(--gap-nav-item);
+}
+
+.nav-icon {
+    width:       var(--tamaño-nav-icon);
+    height:      var(--tamaño-nav-icon);
+    stroke:      var(--blanco);
+    flex-shrink: 0;
+}
