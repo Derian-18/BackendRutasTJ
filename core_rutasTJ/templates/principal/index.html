@@ -1,34 +1,18 @@
+{% extends 'principal/base.html' %}
 {% load static %}
 <!DOCTYPE html>
 <html lang="es">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rutas TJ - Pagina Inicial</title>
-    <link rel="stylesheet" href="{% static 'principal/css/style.css' %}">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>{% block title %}Rutas TJ - Pagina Inicial{% endblock %}</title>
+    {% block extra_css %}
+        <link rel="stylesheet" href="{% static 'principal/css/style.css' %}">
+    {% endblock %}
 </head>
 <body>
-    <header>
-        <a href="{% url 'home' %}" class="logo">
-            <div class="logo-icon">
-                <i class="fas fa-bus"></i>
-            </div>
-            Rutas TJ
-        </a>
-        <nav>
-            <strong><i class="fas fa-home"></i> Inicio</strong>
-            <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i> Mapa</a>
-            <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i> Contacto</a>
-            {% if user.is_authenticated %}
-                <a href="{% url 'login' %}" class="btn-admin">Administrador</a>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
-            {% endif %}
-        </nav>
-    </header>
 
-    <main>
+    {% block content %}
         <section class="hero">
             <div class="hero-img">
                 <img src="{% static 'principal/img/calafia.png' %}" alt="Bus Tijuana">
@@ -46,27 +30,40 @@
 
         <section class="features">
             <div class="feature-item">
-                <i class="fas fa-search"></i>
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="11" cy="11" r="8" stroke="currentColor" stroke-width="2"/>
+                    <path d="M21 21L16.65 16.65" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
                 <h3>Búsqueda de rutas</h3>
                 <p>Buscar rutas de transporte de forma rápida y sencilla</p>
             </div>
             <div class="feature-item">
-                <i class="fas fa-map-marked-alt"></i>
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M21 10.5735C21 17.8863 12 23 12 23S3 17.8863 3 10.5735C3 5.93752 6.58172 2.26856 12 2.26856C17.4183 2.26856 21 5.93752 21 10.5735Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="12" cy="10.5735" r="2.5" stroke="currentColor" stroke-width="2"/>
+                </svg>
                 <h3>Ver en el mapa</h3>
                 <p>Ver en el mapa el trayecto de cada unidad</p>
             </div>
             <div class="feature-item">
-                <i class="fas fa-info-circle"></i>
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 8V12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                    <circle cx="12" cy="16" r="0.5" fill="currentColor"/>
+                </svg>
                 <h3>Información completa</h3>
                 <p>Información de las rutas, trayectos y zonas que cubren</p>
             </div>
             <div class="feature-item">
-                <i class="fas fa-mobile-alt"></i>
+                <svg class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="5" y="2" width="14" height="20" rx="2" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 19H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                </svg>
                 <h3>Acceso universal</h3>
                 <p>Acceso universal desde cualquier dispositivo</p>
             </div>
         </section>
-    </main>
+    {% endblock %}
 
     <footer>
         <p>Todos los derechos reservados &copy; 2026</p>
