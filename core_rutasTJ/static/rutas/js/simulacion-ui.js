@@ -13,8 +13,7 @@ const simUI = (() => {
         progressBar:  () => document.getElementById('sim-progress-bar'),
         pctLabel:     () => document.getElementById('sim-pct-label'),
         stepLabel:    () => document.getElementById('sim-step-label'),
-        paradaActual: () => document.getElementById('sim-parada-actual'),
-        totalParadas: () => document.getElementById('sim-total-paradas'),
+
         btnPlay:      () => document.getElementById('sim-btn-play'),
         btnPause:     () => document.getElementById('sim-btn-pause'),
         btnStop:      () => document.getElementById('sim-btn-stop'),
@@ -43,8 +42,7 @@ const simUI = (() => {
         el.progressBar().style.width    = '0%';
         el.pctLabel().textContent       = '0%';
         el.stepLabel().textContent      = '—';
-        el.paradaActual().textContent   = '—';
-        el.totalParadas().textContent   = '—';
+
     }
 
     /* ── API pública ── */
@@ -57,8 +55,7 @@ const simUI = (() => {
             el.progressBar().style.width      = pct + '%';
             el.pctLabel().textContent         = pct + '%';
             el.stepLabel().textContent        = `Paso ${indice + 1} / ${total}`;
-            el.totalParadas().textContent     = total;
-            el.paradaActual().textContent     = nombreParada;
+
         },
 
         estadoEnCurso() {
