@@ -83,6 +83,11 @@
     </div>
 {% endblock %}
 
+<!-- Eliminamos el footer de esta pagina -->
+{% block footer %}
+
+{% endblock%}
+
 {% block extra_scripts %}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="{% static 'rutas/js/mapa.js' %}"></script>
