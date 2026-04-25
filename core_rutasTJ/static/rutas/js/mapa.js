@@ -13,7 +13,6 @@ const map = L.map('map', {
     maxBoundsViscosity: 1.0
 });
 
-// DESPUÉS — agrega el header con referrerPolicy
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     minZoom: 12,
     maxZoom: 18,
@@ -54,7 +53,6 @@ function getCookie(name) {
 const csrftoken = getCookie('csrftoken');
 
 /* ================= ICONOS PERSONALIZADOS ================= */
-// Ahora usamos clases CSS definidas en styles.css
 const iconoVerde = L.divIcon({
     className: 'custom-div-icon',
     html: `<div class="marker-pin marker-pin-green"></div>`,
@@ -159,11 +157,9 @@ function calcularRutaOptima() {
 }
 
 /* ================= DIBUJAR RUTA ================= */
-// Capas de la ruta (puede ser más de una polyline)
 let capasRuta = [];
 
 function dibujarRutaOptima(ruta) {
-    // Limpiar capas anteriores
     capasRuta.forEach(capa => map.removeLayer(capa));
     capasRuta = [];
     if (rutaActual) { map.removeLayer(rutaActual); rutaActual = null; }
@@ -171,28 +167,23 @@ function dibujarRutaOptima(ruta) {
     const paradas = ruta.filter(paso => paso.tipo === "parada");
     if (paradas.length === 0) return;
 
-    // Dividir en segmentos: cada vez que cambia virtual/no-virtual
-    // dibujamos una polyline distinta con su color
     let segmento = [paradas[0]];
 
     for (let i = 1; i < paradas.length; i++) {
         const actual = paradas[i];
         const anterior = paradas[i - 1];
 
-        // Si el tipo de tramo cambia, cerramos el segmento y abrimos uno nuevo
         if (actual.virtual !== anterior.virtual) {
             dibujarSegmento(segmento, anterior.virtual);
-            segmento = [anterior]; // el punto de unión pertenece a ambos segmentos
+            segmento = [anterior];
         }
         segmento.push(actual);
     }
 
-    // Dibujar el último segmento
     if (segmento.length >= 1) {
         dibujarSegmento(segmento, segmento[segmento.length - 1].virtual);
     }
 
-    // Ajustar zoom al conjunto de todas las capas
     const todasCoords = paradas.map(p => [p.latitud, p.longitud]);
     const bounds = L.latLngBounds(todasCoords);
     map.fitBounds(bounds);
@@ -204,10 +195,10 @@ function dibujarSegmento(paradas, esVirtual) {
     const capa = L.polyline(coords, {
         color: esVirtual ? 'orange' : 'blue',
         weight: 6,
-        dashArray: esVirtual ? '8,6' : null  // punteado para tramos a pie
+        dashArray: esVirtual ? '8,6' : null
     }).addTo(map);
     capasRuta.push(capa);
-    rutaActual = capa; // mantener referencia a la última capa para compatibilidad
+    rutaActual = capa;
 }
 
 /* ================= DIBUJAR RADIOS Y CONEXIONES ================= */
@@ -224,13 +215,13 @@ function dibujarRadiosYConexiones(data) {
     const paradaFin    = data.destino;
 
     circuloA = L.circle([latA, lonA], {
-        radius: 500, // Aqui cambiamos el radio, solo es el color, no es la distancia que envia el backend
+        radius: 500,
         color: 'green',
         fillOpacity: 0.07
     }).addTo(map);
 
     circuloB = L.circle([latB, lonB], {
-        radius: 500, // Igual aqui. De momento el radio para buscar rutas es de 400, este es solo el css, el backend marcara otra medida (Modificar para que sea mas alta)
+        radius: 500,
         color: 'red',
         fillOpacity: 0.07
     }).addTo(map);
@@ -246,7 +237,7 @@ function dibujarRadiosYConexiones(data) {
     ], { color: 'red', dashArray: '5,5', weight: 4 }).addTo(map);
 }
 
-/* ================= ITINERARIO CON CLASES CSS ================= */
+/* ================= ITINERARIO ================= */
 function mostrarItinerario(data) {
     const panel = document.getElementById('itinerario');
     if (!panel) return;
@@ -264,7 +255,6 @@ function mostrarItinerario(data) {
             <div class="itinerary-steps">
     `;
 
-    // Origen
     html += `
         <div class="itinerary-point">
             <span>🟢</span>
@@ -272,7 +262,6 @@ function mostrarItinerario(data) {
         </div>
     `;
 
-    // Rutas y transbordos
     transbordos.forEach((t, i) => {
         html += `
             <div class="itinerary-transfer">
@@ -285,7 +274,6 @@ function mostrarItinerario(data) {
         `;
     });
 
-    // Destino
     html += `
         <div class="itinerary-point">
             <span>🔴</span>
@@ -332,22 +320,13 @@ function llenarTabla(rutas) {
     tbody.innerHTML = '';
     rutas.forEach(ruta => {
         const tr       = document.createElement('tr');
-        const tdId     = document.createElement('td');
         const tdNombre = document.createElement('td');
-        const tdAccion = document.createElement('td');
 
-        tdId.textContent     = ruta.id;
         tdNombre.textContent = ruta.nombre;
+        tdNombre.classList.add('ruta-clickable');
+        tdNombre.addEventListener('click', () => mostrarRuta(ruta.coordenadas));
 
-        const btn = document.createElement('button');
-        btn.textContent   = '👁️ Ver en Mapa';
-        btn.classList.add('btn-view-map'); // Usamos clase en lugar de cssText
-        btn.addEventListener('click', () => mostrarRuta(ruta.coordenadas));
-
-        tdAccion.appendChild(btn);
-        tr.appendChild(tdId);
         tr.appendChild(tdNombre);
-        tr.appendChild(tdAccion);
         tbody.appendChild(tr);
     });
 }

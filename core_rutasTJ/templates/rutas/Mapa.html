@@ -15,68 +15,84 @@
         <link rel="stylesheet" href="{% static 'rutas/css/elementos.css' %}">
         <link rel="stylesheet" href="{% static 'rutas/css/simulacion.css' %}">
     {% endblock %}
-    
 </head>
 <body>
-    <header>
-        <a href="{% url 'home' %}" class="logo">
-            <div class="logo-icon">
-                <i class="fas fa-bus"></i>
-            </div>
-            Rutas TJ
-        </a>
-        <nav>
-            <a href="{% url 'home' %}"><i class="fas fa-home"></i> Inicio</a>
-            <a href="{% url 'mapa' %}"><i class="fas fa-map-marked-alt"></i><strong>Mapa</strong></a>
-            <a href="{% url 'contacto' %}"><i class="fas fa-envelope"></i>Contacto</a>
-            {% if user.is_authenticated %}
-                <a href="{% url 'login' %}" class="btn-admin">Administrador</a>
-            {% else %}
-                <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
-            {% endif %}
-        </nav>
-    </header>
 
 {% block content %}
     <h1>Panel de Rutas</h1>
 
-    <div id="map" style="height: 400px; width: 100%; margin-bottom: 20px;"></div>
+    <div class="mapa-layout">
 
-    <section id="controles">
-        <!-- FIX: id="btnCalcular" necesario para el spinner de carga en mapa.js -->
-        <button id="btnCalcular" type="button" onclick="calcularRutaOptima()">
-            Calcular Ruta
-        </button>
+        <!-- Columna principal: mapa + controles + itinerario + simulación -->
+        <div class="mapa-principal">
+            <div id="map"></div>
 
-        <!-- FIX: Botón duplicado eliminado — ambos llamaban a limpiarMapa() -->
-        <button onclick="limpiarMapa()">
-                Limpiar
-        </button>
-    </section>
-    <div id="itinerario"></div>
+            <section id="controles">
+                <button id="btnCalcular" type="button" onclick="calcularRutaOptima()">
+                    Calcular Ruta
+                </button>
+                <button onclick="limpiarMapa()">
+                    Limpiar
+                </button>
+            </section>
 
-    <hr>
+            <div id="itinerario"></div>
 
-    <section id="tabla-seccion">
-        <h2>Listado de Rutas</h2>
-        <table border="1" style="width: 100%;">
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Nombre</th>
-                    <th>Acciones</th>
-                </tr>
-            </thead>
-            <tbody id="tablaRutas">
-            </tbody>
-        </table>
-    </section>
+            <!-- Panel de simulación — estructura en HTML, comportamiento en simulacion.js,
+                    actualización de UI en simulacion-ui.js -->
+            <div id="sim-panel">
+                <div class="sim-header">
+                    <span class="sim-title">
+                        <span class="sim-bus-icon"></span>
+                        Simulación de Ruta
+                    </span>
+                    <span id="sim-estado" class="sim-badge sim-badge-idle">En espera</span>
+                </div>
+
+                <div class="sim-progress-wrap">
+                    <div class="sim-progress-bar" id="sim-progress-bar"></div>
+                </div>
+                <div class="sim-progress-labels">
+                    <span id="sim-step-label">—</span>
+                    <span id="sim-pct-label">0%</span>
+                </div>
+
+                <div class="sim-btn-row">
+                    <button id="sim-btn-play"  class="sim-btn sim-btn-primary"   onclick="simIniciar()">▶ Iniciar</button>
+                    <button id="sim-btn-pause" class="sim-btn sim-btn-secondary" onclick="simPausar()"  disabled>⏸ Pausar</button>
+                    <button id="sim-btn-stop"  class="sim-btn sim-btn-danger"    onclick="simDetener()" disabled>⏹ Detener</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Sidebar derecha: listado de rutas -->
+        <aside id="sidebar-rutas">
+            <h2>Listado de Rutas</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Nombre</th>
+                    </tr>
+                </thead>
+                <tbody id="tablaRutas">
+                </tbody>
+            </table>
+        </aside>
+
+    </div>
 {% endblock %}
+
+<!-- Eliminamos el footer de esta pagina -->
+{% block footer %}
+
+{% endblock%}
 
 {% block extra_scripts %}
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script src="{% static 'rutas/js/mapa.js' %}"></script>
     <script src="{% static 'rutas/js/simulacion.js' %}"></script>
+    <script src="{% static 'rutas/js/simulacion-ui.js' %}"></script>
 {% endblock %}
 
 </body>

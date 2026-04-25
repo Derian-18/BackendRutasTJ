@@ -142,6 +142,21 @@ main h1 {
 
 
 /* ============================================
+   LAYOUT: MAPA + SIDEBAR
+   ============================================ */
+.mapa-layout {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.mapa-principal {
+    flex: 1;
+    min-width: 0; /* evita overflow en flex */
+}
+
+
+/* ============================================
    MAPA
    ============================================ */
 #map {
@@ -184,48 +199,117 @@ main h1 {
 
 
 /* ============================================
-   TABLA DE RUTAS
+   SIDEBAR DERECHA — LISTADO DE RUTAS
    ============================================ */
-#tabla-seccion {
-    margin-top: 20px;
+#sidebar-rutas {
+    width: 280px;
+    flex-shrink: 0;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    /* Queda pegado al tope mientras el usuario hace scroll */
+    position: sticky;
+    top: 20px;
+    max-height: calc(100vh - 100px);
+    display: flex;
+    flex-direction: column;
 }
 
-#tabla-seccion h2 {
-    font-size: 22px;
-    margin-bottom: 20px;
+#sidebar-rutas h2 {
+    font-size: 16px;
+    color: white;
+    background-color: var(--azul-oscuro);
+    padding: 14px 16px;
+    margin: 0;
+    letter-spacing: 0.02em;
+}
+
+/* La tabla dentro del sidebar ocupa todo el ancho y hace scroll si hay muchas rutas */
+#sidebar-rutas table {
+    width: 100%;
+    border-collapse: collapse;
+    border-radius: 0;
+    box-shadow: none;
+    overflow-y: auto;
+    flex: 1;
+    display: block;   /* necesario para que overflow-y funcione en tabla */
+}
+
+#sidebar-rutas thead {
+    background-color: #f0f4fb;
+    color: var(--azul-oscuro);
+    display: table;
+    width: 100%;
+    table-layout: fixed;
+}
+
+#sidebar-rutas thead th {
+    padding: 10px 12px;
+    text-align: left;
+    font-size: 13px;
     color: var(--azul-oscuro);
 }
 
-table {
+#sidebar-rutas tbody {
+    display: block;
+    overflow-y: auto;
+    max-height: calc(100vh - 220px);
+}
+
+#sidebar-rutas tbody tr {
+    display: table;
     width: 100%;
-    border-collapse: collapse;
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+    table-layout: fixed;
 }
 
-thead {
-    background-color: var(--azul-oscuro);
-    color: white;
+#sidebar-rutas tbody td {
+    padding: 10px 12px;
+    border-bottom: 1px solid #eef0f4;
+    font-size: 13px;
 }
 
-thead th { padding: 14px; text-align: left; }
-
-tbody td {
-    padding: 12px 14px;
-    border-bottom: 1px solid #eee;
-}
-
-tbody tr:hover {
+#sidebar-rutas tbody tr:hover {
     background-color: #f5f7fb;
     transition: 0.2s;
+}
+
+#sidebar-rutas tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.ruta-clickable {
+    cursor: pointer;
+    color: var(--azul-oscuro);
+    font-weight: 500;
+    transition: background-color 0.15s, color 0.15s;
+}
+
+.ruta-clickable:hover {
+    background-color: #e8eef8;
+    color: #16325c;
 }
 
 
 /* ============================================
    RESPONSIVO
    ============================================ */
+@media (max-width: 900px) {
+    .mapa-layout {
+        flex-direction: column;
+    }
+
+    #sidebar-rutas {
+        width: 100%;
+        position: static;
+        max-height: 300px;
+    }
+
+    #sidebar-rutas tbody {
+        max-height: 220px;
+    }
+}
+
 @media (max-width: 768px) {
     main      { padding: 30px 5%; }
     main h1   { font-size: 22px; }
