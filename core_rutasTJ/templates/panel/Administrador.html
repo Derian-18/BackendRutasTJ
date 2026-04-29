@@ -17,11 +17,12 @@
     {% endblock %}
 </head>
 <body>
+
     {% block header %}
         {% if user.is_authenticated %}
             <form action="{% url 'logout' %}" method="post" style="display:inline;">
                 {% csrf_token %}
-                <button type="submit" class="btn-admin">Cerrar sesión</button>
+                <button class="btn-admin">Cerrar sesión</button>
             </form>
         {% else %}
             <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>

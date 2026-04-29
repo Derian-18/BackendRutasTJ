@@ -54,13 +54,14 @@
                 Contacto
             </a>
 
+            <!-- PROBLEMA A RESOLVER -->
+            <!-- Cuando el usuario ya esta autenticado ya no es necesario mandar el metodo POST, ya que ya no se estan mandando datos.
+                Posible solucion: Dejar solo el a href y en login.html usar block header para ahi si usar el metodo POST -->
+
             <!-- Aqui usamos block header porque es diferente en unos HTMLs -->
             {% block header %}
                 {% if user.is_authenticated %}
-                    <form action="{% url 'login' %}" method="post" style="display:inline;">
-                        {% csrf_token %}
-                        <button type="submit" class="btn-admin">Administrador</button>
-                    </form>
+                    <a href="{% url 'administrador' %}" class="btn-admin">Administrador</a>
                 {% else %}
                     <a href="{% url 'login' %}" class="btn-admin">Iniciar sesión</a>
                 {% endif %}
