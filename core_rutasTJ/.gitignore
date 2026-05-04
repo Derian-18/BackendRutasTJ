@@ -7,3 +7,6 @@ env/
 __pycache__/
 *.pyc
 *.pyo
+
+# Docker
+postgres_data/

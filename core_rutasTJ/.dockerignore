@@ -1,0 +1,37 @@
+# Git
+.git
+.gitignore
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environments
+venv/
+ENV/
+env/
+EV/
+
+# Environment variables
+.env
+
+# SQLite
+db.sqlite3
+db.sqlite3.backup
+
+# VSCode
+.vscode/
+
+# JetBrains
+.idea/
+
+# macOS
+.DS_Store
+
+# Logs
+*.log
+
+# Docker
+docker-compose.override.yml
