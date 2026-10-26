@@ -2,7 +2,7 @@ services:
   db:
     image: postgres:17
     container_name: rutas_postgres
-    restart: always
+    restart: no
 
     env_file:
       - .env
@@ -39,7 +39,7 @@ services:
   adminer:
     image: adminer
     container_name: rutas_adminer
-    restart: always
+    restart: no
 
     ports:
       - "8080:8080"
